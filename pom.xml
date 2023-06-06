@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>dev.vality</groupId>
 		<artifactId>service-parent-pom</artifactId>
-		<version>3.0.0-BETA-2</version>
+		<version>2.1.4</version>
 	</parent>
 
 	<artifactId>mayday</artifactId>
@@ -51,6 +51,16 @@
 		<!-- vality -->
 		<dependency>
 			<groupId>dev.vality</groupId>
+			<artifactId>mayday-proto</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>dev.vality</groupId>
+			<artifactId>alert-tg-bot-proto</artifactId>
+			<version>1.4-adf83ed</version>
+		</dependency>
+		<dependency>
+			<groupId>dev.vality</groupId>
 			<artifactId>db-common-lib</artifactId>
 		</dependency>
 		<dependency>
@@ -79,6 +89,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
 		<!--third party-->
@@ -113,6 +127,16 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.11.0</version>
 		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.fabric8</groupId>
+			<artifactId>kubernetes-client</artifactId>
+		</dependency>
+
+
 
 
 		<!-- JOOQ Generator -->
