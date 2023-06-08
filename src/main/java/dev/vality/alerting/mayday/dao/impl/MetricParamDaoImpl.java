@@ -33,6 +33,7 @@ public class MetricParamDaoImpl extends AbstractDao implements MetricParamDao {
                                         .from(METRIC_TEMPLATES_TO_METRIC_PARAMS)
                                         .where(METRIC_TEMPLATES_TO_METRIC_PARAMS.METRIC_TEMPLATE_ID
                                                 .eq(metricTemplateId))));
+        //TODO: Проверить сценарий при 0 записей (необходимо бросать исключение)
         return fetch(query, listRecordRowMapper);
     }
 }

@@ -72,7 +72,7 @@ public class K8sUtil {
     }
 
     public static PrometheusRuleSpec.Group createPrometheusRuleGroup(String groupName) {
-        var group = new PrometheusRuleSpec.Group();
+        var group = PrometheusRuleSpec.Group.builder().build();
         group.setName(groupName);
         group.setRules(new HashSet<>());
         return group;
