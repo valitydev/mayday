@@ -3,28 +3,28 @@ package dev.vality.alerting.mayday.client.model.prometheus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @Data
-@Builder
-@RequiredArgsConstructor
 public class PrometheusRuleSpec {
 
-    private Set<Group> groups;
+    private Set<Group> groups = new HashSet<>();
 
     @Data
-    @Builder
+    @NoArgsConstructor
     public static class Group {
         private String name;
         private Set<Rule> rules;
     }
 
     @Data
-    @Builder
+    @NoArgsConstructor
     public static class Rule {
         private String alert;
         private String expr;

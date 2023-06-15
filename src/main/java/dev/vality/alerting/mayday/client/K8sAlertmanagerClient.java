@@ -2,7 +2,7 @@ package dev.vality.alerting.mayday.client;
 
 import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfig;
 import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfigSpec;
-import dev.vality.alerting.mayday.util.K8sUtil;
+import dev.vality.alerting.mayday.client.util.K8sUtil;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.*;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
@@ -23,6 +23,7 @@ public class K8sAlertmanagerClient {
 
     private final Config k8sConfig;
 
+    //TODO: check on startup?
     public Optional<AlertmanagerConfig> getAlertmanagerConfig(String alertmanagerConfigName)
             throws KubernetesClientException {
         try (KubernetesClient client = new KubernetesClientBuilder().withConfig(k8sConfig).build()) {
@@ -48,8 +49,10 @@ public class K8sAlertmanagerClient {
         }
     }
 
-    public void addReceiverIfNotExists(String configName, AlertmanagerConfigSpec.Receiver receiver) {
-        modifyAlertmanagerConfig(configName, K8sUtil.getAddReceiverFunc(receiver));
+    public void addReceiverAndRouteIfNotExists(String configName,
+                                               AlertmanagerConfigSpec.ChildRoute route,
+                                               AlertmanagerConfigSpec.Receiver receiver) {
+        modifyAlertmanagerConfig(configName, K8sUtil.getAddReceiverAndRouteFunc(route, receiver));
     }
 
     private void modifyAlertmanagerConfig(String configName,

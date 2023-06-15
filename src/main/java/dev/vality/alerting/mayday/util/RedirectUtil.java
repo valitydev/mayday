@@ -6,6 +6,7 @@ import lombok.experimental.UtilityClass;
 public class RedirectUtil {
 
     public static String getAlertmanagerWebhookUrl() {
+        //TODO: Impl
         return null;
     }
 }

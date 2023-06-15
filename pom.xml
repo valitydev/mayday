@@ -162,6 +162,12 @@
 			<artifactId>awaitility</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.fabric8</groupId>
+			<artifactId>kubernetes-server-mock</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -233,6 +239,7 @@
 				<artifactId>flyway-maven-plugin</artifactId>
 				<version>${flyway.version}</version>
 				<configuration>
+					<placeholderReplacement>false</placeholderReplacement>
 					<url>${db.url}</url>
 					<user>${db.user}</user>
 					<password>${db.password}</password>

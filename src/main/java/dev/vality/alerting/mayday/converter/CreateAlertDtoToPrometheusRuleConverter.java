@@ -13,11 +13,12 @@ public class CreateAlertDtoToPrometheusRuleConverter implements Converter<Create
 
     @Override
     public PrometheusRuleSpec.Rule convert(CreateAlertDto source) {
-        return PrometheusRuleSpec.Rule.builder()
-                .alert(source.getAlertId())
-                .expr(source.getPrometheusQuery())
-                .duration(source.getFormattedDurationMinutes())
-                .annotations(Map.of(PrometheusRuleAnnotation.ALERT_NAME, source.getUserFriendlyAlertName()))
-                .build();
+        PrometheusRuleSpec.Rule rule = new PrometheusRuleSpec.Rule();
+        rule.setAlert(source.getAlertId());
+        rule.setExpr(source.getPrometheusQuery());
+        rule.setDuration(source.getFormattedDurationMinutes());
+        rule.setAnnotations(Map.of(PrometheusRuleAnnotation.ALERT_NAME, source.getUserFriendlyAlertName(),
+                        PrometheusRuleAnnotation.ALERT_DESCRIPTION, source.getUserFriendlyAlertDescription()));
+        return rule;
     }
 }

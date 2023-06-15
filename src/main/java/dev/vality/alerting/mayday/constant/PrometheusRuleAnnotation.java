@@ -6,4 +6,6 @@ import lombok.experimental.UtilityClass;
 public class PrometheusRuleAnnotation {
 
     public static final String ALERT_NAME = "alert_name";
+    public static final String USERNAME = "username";
+    public static final String ALERT_DESCRIPTION = "alert_description";
 }

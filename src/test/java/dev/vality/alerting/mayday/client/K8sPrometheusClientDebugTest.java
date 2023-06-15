@@ -5,8 +5,6 @@ import dev.vality.alerting.mayday.client.model.prometheus.PrometheusRuleSpec;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -16,18 +14,13 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled("For local client testing")
-class K8sPrometheusClientTest {
+class K8sPrometheusClientDebugTest {
 
     private final Config config = new ConfigBuilder().withNamespace("default").build();
     private final K8sPrometheusClient client = new K8sPrometheusClient(config);
     private final String ruleName = "testrule";
     private final String groupName = "testGroup";
     private final String alertName = "unittest_alert";
-
-    @AfterEach
-    public void cleanUp() {
-        client.deletePrometheusRule(createTestPrometheusRule());
-    }
 
     @Test
     void createPrometheusRule() {
@@ -45,7 +38,6 @@ class K8sPrometheusClientTest {
 
     @Test
     void getPrometheusRuleGroupAlerts() {
-        createPrometheusRule();
         addAlertToPrometheusRuleGroup();
         var alerts = client.getPrometheusRuleGroupAlerts(ruleName, groupName);
         assertEquals(1, alerts.size());
@@ -67,7 +59,6 @@ class K8sPrometheusClientTest {
 
     @Test
     void addAlertToPrometheusRuleGroup() {
-        createPrometheusRule();
         PrometheusRuleSpec.Rule rule = new PrometheusRuleSpec.Rule();
         rule.setAlert(alertName);
         rule.setExpr("vector(1)");
@@ -81,7 +72,7 @@ class K8sPrometheusClientTest {
         rule.setApiVersion("monitoring.coreos.com/v1");
         rule.setKind("PrometheusRule");
         var metadata = new ObjectMeta();
-        metadata.setLabels(Map.of("alerting-stage", "test"));
+        metadata.setLabels(Map.of("prometheus", "prometheus"));
         metadata.setName(ruleName);
         rule.setMetadata(metadata);
         PrometheusRuleSpec spec = new PrometheusRuleSpec();

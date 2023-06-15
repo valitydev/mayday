@@ -36,8 +36,15 @@ spring:
       idle-timeout: 30000
       maximum-pool-size: 30
   flyway:
+    placeholder-replacement: false
     table: schema_version
     schemas: md
+
+k8s:
+  namespace: default
+telegram-bot:
+  url: http://telegram:1234/endp
+
 
 testcontainers:
   kafka:

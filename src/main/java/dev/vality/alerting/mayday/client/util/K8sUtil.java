@@ -1,4 +1,4 @@
-package dev.vality.alerting.mayday.util;
+package dev.vality.alerting.mayday.client.util;
 
 import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfig;
 import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfigSpec;
@@ -66,29 +66,31 @@ public class K8sUtil {
                 rules = new HashSet<>();
                 group.setRules(rules);
             }
+            //TODO: do not add if already exists?
             rules.add(alert);
             return prometheusRule;
         };
     }
 
     public static PrometheusRuleSpec.Group createPrometheusRuleGroup(String groupName) {
-        var group = PrometheusRuleSpec.Group.builder().build();
+        var group = new PrometheusRuleSpec.Group();
         group.setName(groupName);
         group.setRules(new HashSet<>());
         return group;
     }
 
-    public static UnaryOperator<AlertmanagerConfig> getRemoveReceiverByNameFunc(String receiverName) {
+    public static UnaryOperator<AlertmanagerConfig> getRemoveRouteByNameFunc(String userId, String alertId) {
         return alertmanagerConfig -> {
-            var receivers = alertmanagerConfig.getSpec().getRoute().getRoutes();
-            if (receivers == null || receivers.isEmpty()) {
+            var routes = alertmanagerConfig.getSpec().getRoute().getRoutes();
+            if (routes == null || routes.isEmpty()) {
                 return alertmanagerConfig;
             }
-            var receiverIterator = receivers.iterator();
-            while (receiverIterator.hasNext()) {
-                var receiver = receiverIterator.next();
-                if (receiver.getReceiver().equals(receiverName)) {
-                    receiverIterator.remove();
+            var routesIterator = routes.iterator();
+            while (routesIterator.hasNext()) {
+                var route = routesIterator.next();
+                route.setMatchers();
+                if (receiverName.equals(receiver.getReceiver())) {
+                    routesIterator.remove();
                     break;
                 }
             }
@@ -96,10 +98,30 @@ public class K8sUtil {
         };
     }
 
-    public static UnaryOperator<AlertmanagerConfig> getAddReceiverFunc(AlertmanagerConfigSpec.Receiver receiver) {
+    public static UnaryOperator<AlertmanagerConfig> getAddReceiverAndRouteFunc(AlertmanagerConfigSpec.ChildRoute route,
+                                                                               AlertmanagerConfigSpec.Receiver receiver) {
         return alertmanagerConfig -> {
-            alertmanagerConfig.getSpec().getRoute().getRoutes().add(receiver);
+
+            if (!hasReceiver(alertmanagerConfig, receiver)) {
+                alertmanagerConfig.getSpec().getReceivers().add(receiver);
+            }
+
+            if (!hasRoute(alertmanagerConfig, route)) {
+                alertmanagerConfig.getSpec().getRoute().getRoutes().add(route);
+            }
+
             return alertmanagerConfig;
         };
+    }
+
+    private static boolean hasReceiver(AlertmanagerConfig alertmanagerConfig,
+                                       AlertmanagerConfigSpec.Receiver receiver) {
+        return alertmanagerConfig.getSpec().getReceivers().stream()
+                .anyMatch(configReceiver -> configReceiver.getName().equals(receiver.getName()));
+    }
+
+    private static boolean hasRoute(AlertmanagerConfig alertmanagerConfig, AlertmanagerConfigSpec.ChildRoute route) {
+        return alertmanagerConfig.getSpec().getRoute().getRoutes().stream()
+                .anyMatch(childRoute -> childRoute.equals(route));
     }
 }

@@ -4,6 +4,8 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class K8sParameter {
-    public static final String USER_ID_LABEL = "user_id";
     public static final String PROMETHEUS_RULE_NAME = "mayday_managed_rule";
+    public static final String ALERTMANAGER_CONFIG_NAME = "mayday_managed_config";
+    public static final String ALERTMANAGER_RECEIVER_NAME = "mayday";
+
 }

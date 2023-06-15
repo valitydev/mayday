@@ -5,26 +5,28 @@ import dev.vality.alerting.mayday.ParameterValue;
 import dev.vality.alerting.mayday.constant.MetricRequiredParameter;
 import dev.vality.alerting.mayday.error.AlertConfigurationException;
 import dev.vality.alerting.mayday.CreateAlertRequest;
-import dev.vality.alerting.mayday.domain.tables.pojos.MetricParam;
-import dev.vality.alerting.mayday.domain.tables.pojos.MetricTemplate;
+import dev.vality.alerting.mayday.domain.tables.pojos.AlertParam;
+import dev.vality.alerting.mayday.domain.tables.pojos.AlertTemplate;
 import dev.vality.alerting.mayday.dto.CreateAlertDto;
+import org.springframework.util.DigestUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class MetricTemplateHelper {
+public class TemplateHelper {
 
     public static CreateAlertDto preparePrometheusRuleData(CreateAlertRequest createAlertRequest,
-                                                           MetricTemplate metricTemplate,
-                                                           List<MetricParam> metricParams) {
+                                                           AlertTemplate metricTemplate,
+                                                           List<AlertParam> metricParams) {
 
         Map<String, String> parameters = mergeParameters(createAlertRequest.getParameters(), metricParams);
         String queryExpression = prepareMetricExpression(metricTemplate, parameters);
         String alertId = generateAlertId(createAlertRequest, queryExpression);
 
         //TODO: validation on required params? validate types correctness?
+        //TODO: handle duration params
 
         return CreateAlertDto.builder()
                 .alertId(alertId)
@@ -32,21 +34,21 @@ public class MetricTemplateHelper {
                 .userId(createAlertRequest.getUserId())
                 .userFriendlyAlertName(prepareUserFriendlyAlertName(metricTemplate, parameters))
                 .userFriendlyAlertDescription(prepareMetricAlertMessage(metricTemplate, parameters))
-                .formattedDurationMinutes(formatDuration(parameters.get(MetricRequiredParameter.ALERT_DURATION_MINUTES)))
+                .formattedDurationMinutes(
+                        formatDuration(parameters.get(MetricRequiredParameter.ALERT_DURATION_MINUTES)))
                 .build();
     }
 
     private static Map<String, String> mergeParameters(List<ParameterInfo> externalParamsInfo,
-                                                       List<MetricParam> maydayParamsInfo) {
+                                                       List<AlertParam> maydayParamsInfo) {
         return maydayParamsInfo.stream()
-                .map(maydayParamInfo ->
-                        {
+                .map(maydayParamInfo -> {
                             var externalParamInfo = externalParamsInfo.stream()
                                     .filter(userParamInfo ->
-                                            maydayParamInfo.getSubstitutionName().equals(userParamInfo.getId()))
+                                            maydayParamInfo.getId().toString().equals(userParamInfo.getId()))
                                     .findFirst()
                                     .orElseThrow(() -> new AlertConfigurationException("Unable to find required" +
-                                            " parameter!"));
+                                            " parameter: " + maydayParamInfo.getSubstitutionName()));
                             return new String[]{maydayParamInfo.getSubstitutionName(),
                                     extractParameterValue(externalParamInfo.getType())};
                         }
@@ -63,25 +65,26 @@ public class MetricTemplateHelper {
     }
 
     private static String generateAlertId(CreateAlertRequest createAlertRequest, String preparedExpression) {
-        return Integer.toString(Objects.hash(createAlertRequest, preparedExpression));
+        return DigestUtils.md5DigestAsHex((createAlertRequest.getUserId() + preparedExpression)
+                .getBytes(StandardCharsets.UTF_8));
     }
 
-    private static String prepareMetricExpression(MetricTemplate metricTemplate, Map<String, String> parameters) {
+    private static String prepareMetricExpression(AlertTemplate metricTemplate, Map<String, String> parameters) {
         return prepareTemplate(metricTemplate.getQueryTemplate(), parameters);
     }
 
-    private static String prepareUserFriendlyAlertName(MetricTemplate metricTemplate, Map<String, String> parameters) {
+    private static String prepareUserFriendlyAlertName(AlertTemplate metricTemplate, Map<String, String> parameters) {
         return prepareTemplate(metricTemplate.getAlertNameTemplate(), parameters);
     }
 
-    private static String prepareMetricAlertMessage(MetricTemplate metricTemplate, Map<String, String> parameters) {
+    private static String prepareMetricAlertMessage(AlertTemplate metricTemplate, Map<String, String> parameters) {
         return prepareTemplate(metricTemplate.getAlertMessageTemplate(), parameters);
     }
 
     private static String prepareTemplate(String template, Map<String, String> replacements) {
         String preparedTemplate = template;
         var replacementsEntries = replacements.entrySet();
-        for(Map.Entry<String, String> entry : replacementsEntries) {
+        for (Map.Entry<String, String> entry : replacementsEntries) {
             preparedTemplate = preparedTemplate.replace(formatReplacementVariable(entry.getKey()), entry.getValue());
         }
         return preparedTemplate;

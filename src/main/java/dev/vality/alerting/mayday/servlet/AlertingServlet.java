@@ -10,7 +10,7 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import java.io.IOException;
 
-@WebServlet("/alerting")
+@WebServlet("/mayday")
 @RequiredArgsConstructor
 public class AlertingServlet extends GenericServlet {
 
