@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum MetricRequiredParameter {
+public enum AlertConfigurationRequiredParameter {
 
     RULE_CHECK_DURATION_MINUTES("rule_check_duration_minutes", "Как долго условие должно выполняться (в минутах)," +
             "прежде чем " +

@@ -65,7 +65,7 @@ public class AlertingService implements AlertingServiceSrv.Iface {
         List<AlertParam> metricParams = templateService.getAlertTemplateParams(alertTemplateId);
         AlertConfiguration alertConfiguration = alertParamsToAlertConfiguration.convert(metricParams);
         alertConfiguration.setId(alertTemplateId);
-        log.info("Successfully retrieving configuration for alert '{}': {}", alertTemplateId, alertConfiguration);
+        log.info("Successfully retrieved configuration for alert '{}': {}", alertTemplateId, alertConfiguration);
         return alertConfiguration;
     }
 

@@ -3,7 +3,7 @@ package dev.vality.alerting.mayday.service.helper;
 import dev.vality.alerting.mayday.CreateAlertRequest;
 import dev.vality.alerting.mayday.ParameterInfo;
 import dev.vality.alerting.mayday.ParameterValue;
-import dev.vality.alerting.mayday.constant.MetricRequiredParameter;
+import dev.vality.alerting.mayday.constant.AlertConfigurationRequiredParameter;
 import dev.vality.alerting.mayday.domain.tables.pojos.AlertParam;
 import dev.vality.alerting.mayday.domain.tables.pojos.AlertTemplate;
 import dev.vality.alerting.mayday.dto.CreateAlertDto;
@@ -36,7 +36,8 @@ public class TemplateHelper {
                 .parameters(parameters)
                 .formattedDurationMinutes(
                         formatDuration(parameters
-                                .get(MetricRequiredParameter.RULE_CHECK_DURATION_MINUTES.getParameterTemplate())))
+                                .get(AlertConfigurationRequiredParameter.RULE_CHECK_DURATION_MINUTES
+                                        .getParameterTemplate())))
                 .build();
     }
 
@@ -57,10 +58,11 @@ public class TemplateHelper {
 
         //Required parameters
         var notificationIntervalParam =
-                getRequiredParameter(MetricRequiredParameter.ALERT_REPEAT_MINUTES.getParameterTemplate(),
+                getRequiredParameter(AlertConfigurationRequiredParameter.ALERT_REPEAT_MINUTES.getParameterTemplate(),
                         externalParamsInfo);
         var checkRuleIntervalParam =
-                getRequiredParameter(MetricRequiredParameter.RULE_CHECK_DURATION_MINUTES.getParameterTemplate(),
+                getRequiredParameter(AlertConfigurationRequiredParameter.RULE_CHECK_DURATION_MINUTES
+                                .getParameterTemplate(),
                         externalParamsInfo);
         params.put(notificationIntervalParam.getId(), notificationIntervalParam.getType().getStr());
         params.put(checkRuleIntervalParam.getId(), checkRuleIntervalParam.getType().getStr());

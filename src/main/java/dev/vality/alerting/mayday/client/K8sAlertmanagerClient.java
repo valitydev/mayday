@@ -26,7 +26,6 @@ public class K8sAlertmanagerClient {
 
     private final Config k8sConfig;
 
-    //TODO: check on startup?
     public Optional<AlertmanagerConfig> getAlertmanagerConfig(String alertmanagerConfigName)
             throws KubernetesClientException {
         try (KubernetesClient client = new KubernetesClientBuilder().withConfig(k8sConfig).build()) {

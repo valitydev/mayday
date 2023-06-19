@@ -16,7 +16,6 @@ public class AlertmanagerWebhook {
     public static class Alert {
 
         private String status;
-        //TODO: check format
         private Map<String, String> labels;
         private Map<String, String> annotations;
 

@@ -5,7 +5,6 @@ import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfigSp
 import dev.vality.alerting.mayday.client.model.prometheus.PrometheusRule;
 import dev.vality.alerting.mayday.client.model.prometheus.PrometheusRuleSpec;
 import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
-import dev.vality.alerting.mayday.util.MatcherUtil;
 import lombok.experimental.UtilityClass;
 
 import java.util.HashSet;
@@ -68,7 +67,6 @@ public class K8sUtil {
                 rules = new HashSet<>();
                 group.setRules(rules);
             }
-            //TODO: do not add if already exists?
             rules.add(alert);
             return prometheusRule;
         };
@@ -91,8 +89,8 @@ public class K8sUtil {
             while (routesIterator.hasNext()) {
                 var route = routesIterator.next();
                 var matchers = route.getMatchers();
-                var userMatcher = MatcherUtil.createUserMatcher(PrometheusRuleAnnotation.USERNAME, userId);
-                var alertNameMatcher = MatcherUtil.createUserMatcher(PrometheusRuleAnnotation.ALERT_NAME, alertId);
+                var userMatcher = createMatcher(PrometheusRuleAnnotation.USERNAME, userId);
+                var alertNameMatcher = createMatcher(PrometheusRuleAnnotation.ALERT_NAME, alertId);
                 if (matchers != null && matchers.contains(userMatcher) && matchers.contains(alertNameMatcher)) {
                     routesIterator.remove();
                     break;
@@ -116,7 +114,7 @@ public class K8sUtil {
             while (routesIterator.hasNext()) {
                 var route = routesIterator.next();
                 var matchers = route.getMatchers();
-                var userMatcher = MatcherUtil.createUserMatcher(PrometheusRuleAnnotation.USERNAME, userId);
+                var userMatcher = createMatcher(PrometheusRuleAnnotation.USERNAME, userId);
                 if (matchers.contains(userMatcher)) {
                     routesIterator.remove();
                 }
@@ -140,15 +138,6 @@ public class K8sUtil {
         };
     }
 
-    private static boolean hasReceiver(AlertmanagerConfig alertmanagerConfig,
-                                       AlertmanagerConfigSpec.Receiver receiver) {
-        if (alertmanagerConfig.getSpec().getReceivers() == null) {
-            return false;
-        }
-        return alertmanagerConfig.getSpec().getReceivers().stream()
-                .anyMatch(configReceiver -> configReceiver.getName().equals(receiver.getName()));
-    }
-
     private static boolean hasRoute(AlertmanagerConfig alertmanagerConfig, AlertmanagerConfigSpec.ChildRoute route) {
         if (alertmanagerConfig.getSpec().getRoute() == null
                 || alertmanagerConfig.getSpec().getRoute().getRoutes() == null) {
@@ -156,5 +145,13 @@ public class K8sUtil {
         }
         return alertmanagerConfig.getSpec().getRoute().getRoutes().stream()
                 .anyMatch(childRoute -> childRoute.equals(route));
+    }
+
+    private static AlertmanagerConfigSpec.Matcher createMatcher(String labelName, String labelValue) {
+        AlertmanagerConfigSpec.Matcher matcher = new AlertmanagerConfigSpec.Matcher();
+        matcher.setName(labelName);
+        matcher.setValue(labelValue);
+        matcher.setMatchType("=");
+        return matcher;
     }
 }

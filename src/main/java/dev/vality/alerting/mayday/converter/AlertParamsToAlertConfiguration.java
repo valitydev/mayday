@@ -3,7 +3,7 @@ package dev.vality.alerting.mayday.converter;
 import dev.vality.alerting.mayday.AlertConfiguration;
 import dev.vality.alerting.mayday.ParameterConfiguration;
 import dev.vality.alerting.mayday.ParameterType;
-import dev.vality.alerting.mayday.constant.MetricRequiredParameter;
+import dev.vality.alerting.mayday.constant.AlertConfigurationRequiredParameter;
 import dev.vality.alerting.mayday.domain.enums.AlertParamType;
 import dev.vality.alerting.mayday.domain.tables.pojos.AlertParam;
 import org.springframework.core.convert.converter.Converter;
@@ -25,12 +25,12 @@ public class AlertParamsToAlertConfiguration implements Converter<List<AlertPara
                 .collect(Collectors.toList()));
 
         alertConfiguration.getParameters().addAll(
-                Arrays.stream(MetricRequiredParameter.values())
-                        .map(metricRequiredParameter -> {
+                Arrays.stream(AlertConfigurationRequiredParameter.values())
+                        .map(alertConfigurationRequiredParameter -> {
                             var paramConfiguration = new ParameterConfiguration();
                             paramConfiguration.setType(ParameterType.str);
-                            paramConfiguration.setId(metricRequiredParameter.getParameterTemplate());
-                            paramConfiguration.setName(metricRequiredParameter.getParameterName());
+                            paramConfiguration.setId(alertConfigurationRequiredParameter.getParameterTemplate());
+                            paramConfiguration.setName(alertConfigurationRequiredParameter.getParameterName());
                             return paramConfiguration;
                         }).toList());
         return alertConfiguration;

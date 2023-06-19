@@ -5,10 +5,11 @@ import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfig;
 import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfigSpec;
 import dev.vality.alerting.mayday.config.properties.KubernetesProperties;
 import dev.vality.alerting.mayday.config.properties.MaydayProperties;
+import dev.vality.alerting.mayday.constant.AlertConfigurationRequiredParameter;
 import dev.vality.alerting.mayday.constant.K8sParameter;
-import dev.vality.alerting.mayday.constant.MetricRequiredParameter;
 import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
 import dev.vality.alerting.mayday.dto.CreateAlertDto;
+import dev.vality.alerting.mayday.util.FormatUtil;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import static dev.vality.alerting.mayday.constant.K8sParameter.ALERTMANAGER_CONF
 @RequiredArgsConstructor
 public class AlertmanagerService {
 
-    private static final String DO_NOT_WAIT = "1s";
+    private static final String ONE_SEC_WAIT = FormatUtil.formatSecondsDuration("1");
 
     private final MaydayProperties maydayProperties;
     private final KubernetesProperties kubernetesProperties;
@@ -35,17 +36,17 @@ public class AlertmanagerService {
         AlertmanagerConfigSpec.ChildRoute route = new AlertmanagerConfigSpec.ChildRoute();
         route.setReceiver(K8sParameter.ALERTMANAGER_RECEIVER_NAME);
         route.setGroupBy(Set.of(PrometheusRuleAnnotation.ALERT_NAME));
-        route.setGroupWait(DO_NOT_WAIT);
-        route.setGroupInterval(DO_NOT_WAIT);
+        route.setGroupWait(ONE_SEC_WAIT);
+        route.setGroupInterval(ONE_SEC_WAIT);
         AlertmanagerConfigSpec.Matcher matcher = new AlertmanagerConfigSpec.Matcher();
         matcher.setRegex(false);
         matcher.setName(PrometheusRuleAnnotation.ALERT_NAME);
         matcher.setValue(createAlertDto.getAlertId());
         matcher.setMatchType("=");
         route.setMatchers(Set.of(matcher));
-        //TODO: FormatUtil?
         route.setRepeatInterval(createAlertDto.getParameters()
-                .get(MetricRequiredParameter.ALERT_REPEAT_MINUTES.getParameterTemplate()) + "m");
+                .get(FormatUtil.formatMinutesDuration(
+                        AlertConfigurationRequiredParameter.ALERT_REPEAT_MINUTES.getParameterTemplate())));
         k8sAlertmanagerClient.addRouteIfNotExists(ALERTMANAGER_CONFIG_NAME, route);
     }
 
