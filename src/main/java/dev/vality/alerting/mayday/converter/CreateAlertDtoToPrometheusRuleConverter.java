@@ -1,15 +1,20 @@
 package dev.vality.alerting.mayday.converter;
 
 import dev.vality.alerting.mayday.client.model.prometheus.PrometheusRuleSpec;
+import dev.vality.alerting.mayday.config.properties.KubernetesProperties;
 import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
 import dev.vality.alerting.mayday.dto.CreateAlertDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class CreateAlertDtoToPrometheusRuleConverter implements Converter<CreateAlertDto, PrometheusRuleSpec.Rule> {
+
+    private final KubernetesProperties kubernetesProperties;
 
     @Override
     public PrometheusRuleSpec.Rule convert(CreateAlertDto source) {
@@ -18,7 +23,11 @@ public class CreateAlertDtoToPrometheusRuleConverter implements Converter<Create
         rule.setExpr(source.getPrometheusQuery());
         rule.setDuration(source.getFormattedDurationMinutes());
         rule.setAnnotations(Map.of(PrometheusRuleAnnotation.ALERT_NAME, source.getUserFriendlyAlertName(),
+                        PrometheusRuleAnnotation.USERNAME, source.getUserId(),
                         PrometheusRuleAnnotation.ALERT_DESCRIPTION, source.getUserFriendlyAlertDescription()));
+        //TODO: https://github.com/prometheus-operator/prometheus-operator/discussions/3733
+        rule.setLabels(Map.of("namespace", kubernetesProperties.getNamespace(),
+                PrometheusRuleAnnotation.USERNAME, source.getUserId()));
         return rule;
     }
 }

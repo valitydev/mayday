@@ -22,7 +22,7 @@ management:
 
 spring:
   application:
-    name: '${project.name}'
+    name: 'mayday'
   output:
     ansi:
       enabled: always
@@ -40,14 +40,22 @@ spring:
     table: schema_version
     schemas: md
 
+mayday:
+  webhook-url: http://localhost:8022
+  alertmanager-webhook-path: /alertmanager/webhook
+
 k8s:
   namespace: default
+  prometheus-rule:
+    labels:
+      prometheus: prometheus
+  alertmanager-configuration:
+    labels:
+      alertmanager: alertmanager
 telegram-bot:
   url: http://telegram:1234/endp
 
 
 testcontainers:
-  kafka:
-    tag: 7.3.3
   postgresql:
     tag: '13'

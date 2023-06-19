@@ -32,8 +32,7 @@ public class K8sPrometheusClient {
             MixedOperation<PrometheusRule, KubernetesResourceList<PrometheusRule>, Resource<PrometheusRule>>
                     prometheusRuleClient = client.resources(PrometheusRule.class);
             try {
-                var result = prometheusRuleClient.inNamespace(client.getNamespace()).resource(prometheusRule).create();
-                System.out.println(result);
+                prometheusRuleClient.inNamespace(client.getNamespace()).resource(prometheusRule).create();
             } catch (KubernetesClientException e) {
                 if (!e.getStatus().getCode().equals(ALREADY_EXISTS_ERROR_CODE)) {
                     throw e;
@@ -58,7 +57,6 @@ public class K8sPrometheusClient {
         try (KubernetesClient client = new KubernetesClientBuilder().withConfig(k8sConfig).build()) {
             MixedOperation<PrometheusRule, KubernetesResourceList<PrometheusRule>, Resource<PrometheusRule>>
                     prometheusRuleClient = client.resources(PrometheusRule.class);
-            client.close();
             var rule =
                     prometheusRuleClient.inNamespace(client.getNamespace()).withName(ruleName).get();
             if (rule == null) {

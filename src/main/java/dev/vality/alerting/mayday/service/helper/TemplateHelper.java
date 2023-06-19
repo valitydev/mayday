@@ -34,14 +34,16 @@ public class TemplateHelper {
                 .userId(createAlertRequest.getUserId())
                 .userFriendlyAlertName(prepareUserFriendlyAlertName(metricTemplate, parameters))
                 .userFriendlyAlertDescription(prepareMetricAlertMessage(metricTemplate, parameters))
+                .parameters(parameters)
                 .formattedDurationMinutes(
-                        formatDuration(parameters.get(MetricRequiredParameter.ALERT_DURATION_MINUTES)))
+                        formatDuration(parameters
+                                .get(MetricRequiredParameter.RULE_CHECK_DURATION_MINUTES.getParameterTemplate())))
                 .build();
     }
 
     private static Map<String, String> mergeParameters(List<ParameterInfo> externalParamsInfo,
                                                        List<AlertParam> maydayParamsInfo) {
-        return maydayParamsInfo.stream()
+        Map<String, String> params = maydayParamsInfo.stream()
                 .map(maydayParamInfo -> {
                             var externalParamInfo = externalParamsInfo.stream()
                                     .filter(userParamInfo ->
@@ -53,6 +55,25 @@ public class TemplateHelper {
                                     extractParameterValue(externalParamInfo.getType())};
                         }
                 ).collect(Collectors.toMap(strings -> strings[0], strings -> strings[1]));
+
+        //Required parameters
+        var notificationIntervalParam =
+                getRequiredParameter(MetricRequiredParameter.ALERT_REPEAT_MINUTES.getParameterTemplate(),
+                        externalParamsInfo);
+        var checkRuleIntervalParam =
+                getRequiredParameter(MetricRequiredParameter.RULE_CHECK_DURATION_MINUTES.getParameterTemplate(),
+                        externalParamsInfo);
+        params.put(notificationIntervalParam.getId(), notificationIntervalParam.getType().getStr());
+        params.put(checkRuleIntervalParam.getId(), checkRuleIntervalParam.getType().getStr());
+        return params;
+    }
+
+    private static ParameterInfo getRequiredParameter(String name, List<ParameterInfo> parameterInfos) {
+        return parameterInfos.stream()
+                .filter(paramInfo ->
+                        paramInfo.getId().equals(name))
+                .findFirst().orElseThrow(() -> new AlertConfigurationException("Unable to find required" +
+                        " parameter: " + name));
     }
     
     private static String extractParameterValue(ParameterValue parameterValue) {

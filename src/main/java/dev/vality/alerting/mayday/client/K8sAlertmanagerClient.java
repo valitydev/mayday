@@ -49,10 +49,9 @@ public class K8sAlertmanagerClient {
         }
     }
 
-    public void addReceiverAndRouteIfNotExists(String configName,
-                                               AlertmanagerConfigSpec.ChildRoute route,
-                                               AlertmanagerConfigSpec.Receiver receiver) {
-        modifyAlertmanagerConfig(configName, K8sUtil.getAddReceiverAndRouteFunc(route, receiver));
+    public void addRouteIfNotExists(String configName,
+                                    AlertmanagerConfigSpec.ChildRoute route) {
+        modifyAlertmanagerConfig(configName, K8sUtil.getAddRouteFunc(route));
     }
 
     private void modifyAlertmanagerConfig(String configName,
@@ -68,8 +67,12 @@ public class K8sAlertmanagerClient {
         }
     }
 
-    public void deleteReceiver(String configName, String receiverName) {
-        modifyAlertmanagerConfig(configName, K8sUtil.getRemoveReceiverByNameFunc(receiverName));
+    public void deleteRoute(String configName, String userId, String alertId) {
+        modifyAlertmanagerConfig(configName, K8sUtil.getRemoveRouteByUserAndAlertFunc(userId, alertId));
+    }
+
+    public void deleteRoutes(String configName, String userId) {
+        modifyAlertmanagerConfig(configName, K8sUtil.getRemoveUserRoutesFunc(userId));
     }
 
 

@@ -4,6 +4,8 @@ import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfig;
 import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfigSpec;
 import dev.vality.alerting.mayday.client.model.prometheus.PrometheusRule;
 import dev.vality.alerting.mayday.client.model.prometheus.PrometheusRuleSpec;
+import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
+import dev.vality.alerting.mayday.util.MatcherUtil;
 import lombok.experimental.UtilityClass;
 
 import java.util.HashSet;
@@ -79,7 +81,7 @@ public class K8sUtil {
         return group;
     }
 
-    public static UnaryOperator<AlertmanagerConfig> getRemoveRouteByNameFunc(String userId, String alertId) {
+    public static UnaryOperator<AlertmanagerConfig> getRemoveRouteByUserAndAlertFunc(String userId, String alertId) {
         return alertmanagerConfig -> {
             var routes = alertmanagerConfig.getSpec().getRoute().getRoutes();
             if (routes == null || routes.isEmpty()) {
@@ -88,8 +90,10 @@ public class K8sUtil {
             var routesIterator = routes.iterator();
             while (routesIterator.hasNext()) {
                 var route = routesIterator.next();
-                route.setMatchers();
-                if (receiverName.equals(receiver.getReceiver())) {
+                var matchers = route.getMatchers();
+                var userMatcher = MatcherUtil.createUserMatcher(PrometheusRuleAnnotation.USERNAME, userId);
+                var alertNameMatcher = MatcherUtil.createUserMatcher(PrometheusRuleAnnotation.ALERT_NAME, alertId);
+                if (matchers != null && matchers.contains(userMatcher) && matchers.contains(alertNameMatcher)) {
                     routesIterator.remove();
                     break;
                 }
@@ -98,16 +102,38 @@ public class K8sUtil {
         };
     }
 
-    public static UnaryOperator<AlertmanagerConfig> getAddReceiverAndRouteFunc(AlertmanagerConfigSpec.ChildRoute route,
-                                                                               AlertmanagerConfigSpec.Receiver receiver) {
+    public static UnaryOperator<AlertmanagerConfig> getRemoveUserRoutesFunc(String userId) {
         return alertmanagerConfig -> {
-
-            if (!hasReceiver(alertmanagerConfig, receiver)) {
-                alertmanagerConfig.getSpec().getReceivers().add(receiver);
+            if (alertmanagerConfig.getSpec() == null) {
+                return alertmanagerConfig;
             }
 
+            var routes = alertmanagerConfig.getSpec().getRoute().getRoutes();
+            if (routes == null || routes.isEmpty()) {
+                return alertmanagerConfig;
+            }
+            var routesIterator = routes.iterator();
+            while (routesIterator.hasNext()) {
+                var route = routesIterator.next();
+                var matchers = route.getMatchers();
+                var userMatcher = MatcherUtil.createUserMatcher(PrometheusRuleAnnotation.USERNAME, userId);
+                if (matchers.contains(userMatcher)) {
+                    routesIterator.remove();
+                }
+            }
+            return alertmanagerConfig;
+        };
+    }
+
+    public static UnaryOperator<AlertmanagerConfig> getAddRouteFunc(
+            AlertmanagerConfigSpec.ChildRoute route) {
+        return alertmanagerConfig -> {
+
             if (!hasRoute(alertmanagerConfig, route)) {
-                alertmanagerConfig.getSpec().getRoute().getRoutes().add(route);
+                var configRoute = alertmanagerConfig.getSpec().getRoute() == null
+                        ? new AlertmanagerConfigSpec.Route() : alertmanagerConfig.getSpec().getRoute();
+                configRoute.getRoutes().add(route);
+                alertmanagerConfig.getSpec().setRoute(configRoute);
             }
 
             return alertmanagerConfig;
@@ -116,11 +142,18 @@ public class K8sUtil {
 
     private static boolean hasReceiver(AlertmanagerConfig alertmanagerConfig,
                                        AlertmanagerConfigSpec.Receiver receiver) {
+        if (alertmanagerConfig.getSpec().getReceivers() == null) {
+            return false;
+        }
         return alertmanagerConfig.getSpec().getReceivers().stream()
                 .anyMatch(configReceiver -> configReceiver.getName().equals(receiver.getName()));
     }
 
     private static boolean hasRoute(AlertmanagerConfig alertmanagerConfig, AlertmanagerConfigSpec.ChildRoute route) {
+        if (alertmanagerConfig.getSpec().getRoute() == null
+                || alertmanagerConfig.getSpec().getRoute().getRoutes() == null) {
+            return false;
+        }
         return alertmanagerConfig.getSpec().getRoute().getRoutes().stream()
                 .anyMatch(childRoute -> childRoute.equals(route));
     }

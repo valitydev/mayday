@@ -25,6 +25,7 @@ public class AlertmanagerController {
 
     @PostMapping(value = "/webhook", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity processWebhook(@RequestBody AlertmanagerWebhook webhook) {
+        log.info("received smth: {}", webhook);
         var notifications = webhookToNotificationsConverter.convert(webhook);
         for (Notification notification : notifications) {
             try {

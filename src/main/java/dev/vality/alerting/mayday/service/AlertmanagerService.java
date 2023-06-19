@@ -1,48 +1,85 @@
 package dev.vality.alerting.mayday.service;
 
 import dev.vality.alerting.mayday.client.K8sAlertmanagerClient;
+import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfig;
 import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfigSpec;
+import dev.vality.alerting.mayday.config.properties.KubernetesProperties;
+import dev.vality.alerting.mayday.config.properties.MaydayProperties;
 import dev.vality.alerting.mayday.constant.K8sParameter;
 import dev.vality.alerting.mayday.constant.MetricRequiredParameter;
 import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
 import dev.vality.alerting.mayday.dto.CreateAlertDto;
-import dev.vality.alerting.mayday.util.RedirectUtil;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
+import static dev.vality.alerting.mayday.constant.K8sParameter.ALERTMANAGER_CONFIG_NAME;
+
 @Service
 @RequiredArgsConstructor
 public class AlertmanagerService {
 
-    private static final String DO_NOT_WAIT = "0s";
+    private static final String DO_NOT_WAIT = "1s";
 
+    private final MaydayProperties maydayProperties;
+    private final KubernetesProperties kubernetesProperties;
     private final K8sAlertmanagerClient k8sAlertmanagerClient;
 
     public void createUserRoute(CreateAlertDto createAlertDto) {
-        AlertmanagerConfigSpec.Receiver receiver = new AlertmanagerConfigSpec.Receiver();
-        receiver.setName(K8sParameter.ALERTMANAGER_RECEIVER_NAME);
-        var webhookConfig = new AlertmanagerConfigSpec.WebhookConfig();
-        webhookConfig.setUrl(RedirectUtil.getAlertmanagerWebhookUrl());
-        receiver.setWebhookConfigs(Set.of(webhookConfig));
+        if (k8sAlertmanagerClient.getAlertmanagerConfig(ALERTMANAGER_CONFIG_NAME).isEmpty()) {
+            k8sAlertmanagerClient.createAlertmanagerConfig(buildAlertmanagerConfig());
+        }
 
         AlertmanagerConfigSpec.ChildRoute route = new AlertmanagerConfigSpec.ChildRoute();
-        route.setReceiver(receiver.getName());
-        route.setGroupBy(Set.of(PrometheusRuleAnnotation.ALERT_NAME, PrometheusRuleAnnotation.USERNAME));
+        route.setReceiver(K8sParameter.ALERTMANAGER_RECEIVER_NAME);
+        route.setGroupBy(Set.of(PrometheusRuleAnnotation.ALERT_NAME));
         route.setGroupWait(DO_NOT_WAIT);
         route.setGroupInterval(DO_NOT_WAIT);
+        AlertmanagerConfigSpec.Matcher matcher = new AlertmanagerConfigSpec.Matcher();
+        matcher.setRegex(false);
+        matcher.setName(PrometheusRuleAnnotation.ALERT_NAME);
+        matcher.setValue(createAlertDto.getAlertId());
+        matcher.setMatchType("=");
+        route.setMatchers(Set.of(matcher));
         //TODO: FormatUtil?
         route.setRepeatInterval(createAlertDto.getParameters()
-                .get(MetricRequiredParameter.ALERT_DURATION_MINUTES.getParameterName()) + "m");
-        k8sAlertmanagerClient.addReceiverAndRouteIfNotExists(K8sParameter.ALERTMANAGER_CONFIG_NAME, route, receiver);
+                .get(MetricRequiredParameter.ALERT_REPEAT_MINUTES.getParameterTemplate()) + "m");
+        k8sAlertmanagerClient.addRouteIfNotExists(ALERTMANAGER_CONFIG_NAME, route);
     }
 
     public void deleteUserRoute(String userId, String alertId) {
-        k8sAlertmanagerClient.
+        if (k8sAlertmanagerClient.getAlertmanagerConfig(ALERTMANAGER_CONFIG_NAME).isEmpty()) {
+            return;
+        }
+        k8sAlertmanagerClient.deleteRoute(ALERTMANAGER_CONFIG_NAME, userId, alertId);
     }
 
     public void deleteUserRoutes(String userId) {
+        if (k8sAlertmanagerClient.getAlertmanagerConfig(ALERTMANAGER_CONFIG_NAME).isEmpty()) {
+            return;
+        }
+        k8sAlertmanagerClient.deleteRoutes(ALERTMANAGER_CONFIG_NAME, userId);
+    }
 
+    private AlertmanagerConfig buildAlertmanagerConfig() {
+        AlertmanagerConfigSpec.Route rootRoute = new AlertmanagerConfigSpec.Route();
+        rootRoute.setReceiver(K8sParameter.ALERTMANAGER_RECEIVER_NAME);
+        AlertmanagerConfigSpec.Receiver receiver = new AlertmanagerConfigSpec.Receiver();
+        receiver.setName(K8sParameter.ALERTMANAGER_RECEIVER_NAME);
+        var webhookConfig = new AlertmanagerConfigSpec.WebhookConfig();
+        webhookConfig.setUrl(maydayProperties.getWebhookUrl() + maydayProperties.getAlertmanagerWebhookPath());
+        receiver.setWebhookConfigs(Set.of(webhookConfig));
+        AlertmanagerConfigSpec spec = new AlertmanagerConfigSpec();
+        spec.setReceivers(Set.of(receiver));
+        spec.setRoute(rootRoute);
+        AlertmanagerConfig alertmanagerConfig = new AlertmanagerConfig();
+        alertmanagerConfig.setSpec(spec);
+        var metadata = new ObjectMeta();
+        metadata.setLabels(kubernetesProperties.getAlertmanagerConfiguration().getLabels());
+        metadata.setName(ALERTMANAGER_CONFIG_NAME);
+        alertmanagerConfig.setMetadata(metadata);
+        return alertmanagerConfig;
     }
 }

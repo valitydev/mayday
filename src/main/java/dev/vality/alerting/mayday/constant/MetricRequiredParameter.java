@@ -7,7 +7,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum MetricRequiredParameter {
 
-    ALERT_DURATION_MINUTES("alert_duration_minutes", "Как часто присылать уведомления (в минутах)");
+    RULE_CHECK_DURATION_MINUTES("rule_check_duration_minutes", "Как долго условие должно выполняться (в минутах)," +
+            "прежде чем " +
+            "отправить уведомление?"),
+    ALERT_REPEAT_MINUTES("alert_repeat_minutes", "Как часто присылать повторные уведомления (в минутах)?");
 
     private final String parameterTemplate;
     private final String parameterName;

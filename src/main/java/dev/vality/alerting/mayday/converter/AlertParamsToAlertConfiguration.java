@@ -24,13 +24,15 @@ public class AlertParamsToAlertConfiguration implements Converter<List<AlertPara
                         .setType(mapToParameterType(param.getParameterType())))
                 .collect(Collectors.toList()));
 
-        alertConfiguration.getParameters().addAll(Arrays.stream(MetricRequiredParameter.values()).map(metricRequiredParameter -> {
-            var paramConfiguration = new ParameterConfiguration();
-            paramConfiguration.setType(ParameterType.str);
-            paramConfiguration.setId(metricRequiredParameter.getParameterName());
-            paramConfiguration.setName(metricRequiredParameter.getParameterTemplate());
-            return paramConfiguration;
-        }).toList());
+        alertConfiguration.getParameters().addAll(
+                Arrays.stream(MetricRequiredParameter.values())
+                        .map(metricRequiredParameter -> {
+                            var paramConfiguration = new ParameterConfiguration();
+                            paramConfiguration.setType(ParameterType.str);
+                            paramConfiguration.setId(metricRequiredParameter.getParameterTemplate());
+                            paramConfiguration.setName(metricRequiredParameter.getParameterName());
+                            return paramConfiguration;
+                        }).toList());
         return alertConfiguration;
     }
 

@@ -1,0 +1,35 @@
+{
+  "receiver": "webhook",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "unittest_alert",
+        "prometheus": "default/prometheus"
+      },
+      "annotations": {
+        "readable_name": "тестовый алерт",
+        "alert_description": "что-то случилось :("
+      },
+      "startsAt": "2023-06-14T11:00:52.059Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://prometheus-prometheus-0:9090/graph?g0.expr=vector%281%29\u0026g0.tab=1",
+      "fingerprint": "9f370ce461911051"
+    }
+  ],
+  "groupLabels": {
+    "alertname": "unittest_alert"
+  },
+  "commonLabels": {
+    "alertname": "unittest_alert",
+    "prometheus": "default/prometheus"
+  },
+  "commonAnnotations": {
+    "readable_name": "тестовый алерт"
+  },
+  "externalURL": "http://alertmanager-alertmanager-0:9093",
+  "version": "4",
+  "groupKey": "{}:{alertname=\"unittest_alert\"}",
+  "truncatedAlerts": 0
+}

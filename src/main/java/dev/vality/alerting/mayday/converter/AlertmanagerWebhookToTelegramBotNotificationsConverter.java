@@ -1,11 +1,13 @@
 package dev.vality.alerting.mayday.converter;
 
+import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
 import dev.vality.alerting.mayday.model.AlertmanagerWebhook;
 import dev.vality.alerting.tg_bot.Notification;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,11 +23,17 @@ public class AlertmanagerWebhookToTelegramBotNotificationsConverter
     }
 
     private Notification convertAlertToNotification(String receiver, AlertmanagerWebhook.Alert alert) {
+        var annotations = alert.getAnnotations();
         return new Notification()
                 .setId(UUID.randomUUID().toString())
                 .setReceiverId(receiver)
-                //TODO: convert to smth readable
-                .setMessage(alert.getAnnotations());
+                .setMessage(createMessage(alert.getStatus().equals("firing"), annotations));
+    }
+
+    private String createMessage(boolean isFiring, Map<String, String> annotations) {
+        String prefix = isFiring ? PrometheusRuleAnnotation.ALERT_FIRING_PREFIX :
+                PrometheusRuleAnnotation.ALERT_NOT_FIRING_PREFIX;
+        return prefix + annotations.get(PrometheusRuleAnnotation.ALERT_DESCRIPTION);
     }
 
 

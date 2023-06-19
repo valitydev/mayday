@@ -3,6 +3,7 @@ package dev.vality.alerting.mayday.model;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class AlertmanagerWebhook {
@@ -16,8 +17,8 @@ public class AlertmanagerWebhook {
 
         private String status;
         //TODO: check format
-        private String labels;
-        private String annotations;
+        private Map<String, String> labels;
+        private Map<String, String> annotations;
 
     }
 }

@@ -28,7 +28,7 @@ public class AlertingService implements AlertingServiceSrv.Iface {
     @Override
     public void deleteAllAlerts(String userId) {
         log.info("Removing all alerts for user '{}'", userId);
-        alertmanagerService.deleteUserRoute(userId);
+        alertmanagerService.deleteUserRoutes(userId);
         prometheusService.deleteAllUserAlerts(userId);
         log.info("Removed all alerts for user '{}'", userId);
     }
@@ -36,6 +36,7 @@ public class AlertingService implements AlertingServiceSrv.Iface {
     @Override
     public void deleteAlert(String userId, String alertId) {
         log.info("Removing alert '{}' for user '{}'", alertId, userId);
+        alertmanagerService.deleteUserRoute(userId, alertId);
         prometheusService.deleteUserAlert(userId, alertId);
         log.info("Removed alert '{}' for user '{}'", alertId, userId);
     }

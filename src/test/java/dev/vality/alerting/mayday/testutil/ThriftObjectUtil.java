@@ -19,11 +19,11 @@ public class ThriftObjectUtil {
         request.setUserId(UUID.randomUUID().toString());
         request.setParameters(
                 alertConfiguration.getParameters().stream().map(parameterConfiguration -> {
-            var paramInfo = new ParameterInfo();
-            paramInfo.setType(ParameterValue.str(UUID.randomUUID().toString()));
-            paramInfo.setId(parameterConfiguration.getId());
-            return paramInfo;
-        }).collect(Collectors.toList()));
+                    var paramInfo = new ParameterInfo();
+                    paramInfo.setType(ParameterValue.str(UUID.randomUUID().toString()));
+                    paramInfo.setId(parameterConfiguration.getId());
+                    return paramInfo;
+                }).collect(Collectors.toList()));
         return request;
     }
 }

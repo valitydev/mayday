@@ -31,7 +31,7 @@ class K8sAlertmanagerClientDebugTest {
 
     @Test
     void deleteAlertmanagerConfig() {
-        client.deleteAlertmanagerConfig(alertmanagerConfigName);
+        //client.deleteAlertmanagerConfig(alertmanagerConfigName);
     }
 
     @Test
@@ -66,11 +66,13 @@ class K8sAlertmanagerClientDebugTest {
         AlertmanagerConfigSpec.ChildRoute route = new AlertmanagerConfigSpec.ChildRoute();
         route.setReceiver(receiverName);
         route.setRepeatInterval("5m");
-        client.addReceiverAndRouteIfNotExists(alertmanagerConfigName, route);
+
+        AlertmanagerConfigSpec.Receiver receiver = new AlertmanagerConfigSpec.Receiver();
+        client.addRouteIfNotExists(alertmanagerConfigName, route);
     }
 
     @Test
     void deleteReceivers() {
-        client.deleteReceiver(alertmanagerConfigName, receiverName);
+        client.deleteRoutes(alertmanagerConfigName, receiverName);
     }
 }

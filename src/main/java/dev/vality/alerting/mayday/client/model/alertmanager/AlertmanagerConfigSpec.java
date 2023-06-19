@@ -3,6 +3,7 @@ package dev.vality.alerting.mayday.client.model.alertmanager;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -20,14 +21,14 @@ public class AlertmanagerConfigSpec {
         private String groupWait;
         private String groupInterval;
         private String repeatInterval;
-        private Set<ChildRoute> routes;
+        private Set<ChildRoute> routes = new HashSet<>();
     }
 
     @Data
     public static class ChildRoute {
         private String receiver;
         private Set<String> groupBy;
-        private Set<String> matchers;
+        private Set<Matcher> matchers;
         private String groupWait;
         private String groupInterval;
         private String repeatInterval;
@@ -42,6 +43,14 @@ public class AlertmanagerConfigSpec {
     @Data
     public static class WebhookConfig {
         private String url;
+    }
+
+    @Data
+    public static class Matcher {
+        private String name;
+        private String value;
+        private String matchType;
+        private boolean regex;
     }
 
 }
