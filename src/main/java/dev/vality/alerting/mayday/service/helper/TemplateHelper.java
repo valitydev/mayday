@@ -27,7 +27,6 @@ public class TemplateHelper {
 
         //TODO: validation on required params? validate types correctness?
         //TODO: handle duration params
-
         return CreateAlertDto.builder()
                 .alertId(alertId)
                 .prometheusQuery(queryExpression)
