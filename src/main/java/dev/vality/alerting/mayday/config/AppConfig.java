@@ -1,6 +1,5 @@
 package dev.vality.alerting.mayday.config;
 
-import dev.vality.alerting.mayday.AlertingServiceSrv;
 import dev.vality.alerting.mayday.config.properties.TelegramBotProperties;
 import dev.vality.alerting.tg_bot.NotifierServiceSrv;
 import dev.vality.woody.thrift.impl.http.THSpawnClientBuilder;

@@ -1,8 +1,6 @@
 package dev.vality.alerting.mayday.controller;
 
 import dev.vality.alerting.mayday.MaydayApplication;
-import dev.vality.alerting.mayday.converter.AlertmanagerWebhookToTelegramBotNotificationsConverter;
-import dev.vality.alerting.mayday.service.TemplateService;
 import dev.vality.alerting.tg_bot.NotifierServiceSrv;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.AfterEach;
@@ -10,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,15 +15,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 

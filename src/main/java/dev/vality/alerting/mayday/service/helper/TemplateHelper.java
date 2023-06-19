@@ -1,13 +1,13 @@
 package dev.vality.alerting.mayday.service.helper;
 
+import dev.vality.alerting.mayday.CreateAlertRequest;
 import dev.vality.alerting.mayday.ParameterInfo;
 import dev.vality.alerting.mayday.ParameterValue;
 import dev.vality.alerting.mayday.constant.MetricRequiredParameter;
-import dev.vality.alerting.mayday.error.AlertConfigurationException;
-import dev.vality.alerting.mayday.CreateAlertRequest;
 import dev.vality.alerting.mayday.domain.tables.pojos.AlertParam;
 import dev.vality.alerting.mayday.domain.tables.pojos.AlertTemplate;
 import dev.vality.alerting.mayday.dto.CreateAlertDto;
+import dev.vality.alerting.mayday.error.AlertConfigurationException;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;

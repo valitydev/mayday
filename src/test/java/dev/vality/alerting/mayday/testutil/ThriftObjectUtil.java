@@ -6,7 +6,6 @@ import dev.vality.alerting.mayday.ParameterInfo;
 import dev.vality.alerting.mayday.ParameterValue;
 import lombok.experimental.UtilityClass;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
