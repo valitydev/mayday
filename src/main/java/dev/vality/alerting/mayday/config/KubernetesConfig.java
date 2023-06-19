@@ -6,6 +6,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Objects;
 
@@ -17,7 +18,7 @@ public class KubernetesConfig {
 
     @Bean
     public Config k8sConfig() {
-        if (Objects.isNull(kubernetesProperties.getNamespace())) {
+        if (ObjectUtils.isEmpty(kubernetesProperties.getNamespace())) {
             return new ConfigBuilder().withDefaultNamespace().build();
         }
 
