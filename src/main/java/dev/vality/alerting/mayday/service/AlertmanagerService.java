@@ -45,9 +45,8 @@ public class AlertmanagerService {
         var usernameMatcher =
                 K8sUtil.createMatcher(PrometheusRuleLabel.USERNAME_LABEL_NAME, createAlertDto.getUserId());
         route.setMatchers(Set.of(alertnameMatcher, usernameMatcher));
-        route.setRepeatInterval(createAlertDto.getParameters()
-                .get(FormatUtil.formatMinutesDuration(
-                        AlertConfigurationRequiredParameter.ALERT_REPEAT_MINUTES.getParameterTemplate())));
+        route.setRepeatInterval(FormatUtil.formatMinutesDuration(createAlertDto.getParameters()
+                .get(AlertConfigurationRequiredParameter.ALERT_REPEAT_MINUTES.getParameterTemplate())));
         k8sAlertmanagerClient.addRouteIfNotExists(ALERTMANAGER_CONFIG_NAME, route);
     }
 
