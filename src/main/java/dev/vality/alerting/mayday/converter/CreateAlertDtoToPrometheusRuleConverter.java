@@ -28,7 +28,7 @@ public class CreateAlertDtoToPrometheusRuleConverter implements Converter<Create
                 PrometheusRuleAnnotation.ALERT_DESCRIPTION, source.getUserFriendlyAlertDescription()));
         // Лейбл с неймспейсом необходим, поскольку алертменеджер по умолчанию начинает фильтровать по нему.
         // Тут описано более подробно: https://github.com/prometheus-operator/prometheus-operator/discussions/3733
-        rule.setLabels(Map.of(PrometheusRuleLabel.NAMESPACE_LABEL_NAME, kubernetesProperties.getNamespace(),
+        rule.setLabels(Map.of(PrometheusRuleLabel.NAMESPACE_LABEL_NAME, "default",
                 PrometheusRuleLabel.USERNAME_LABEL_NAME, source.getUserId(),
                 "service", "mayday"));
         return rule;
