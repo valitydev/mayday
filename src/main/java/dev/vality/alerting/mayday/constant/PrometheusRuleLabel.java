@@ -7,4 +7,5 @@ public class PrometheusRuleLabel {
 
     public static final String NAMESPACE_LABEL_NAME = "namespace";
     public static final String USERNAME_LABEL_NAME = "username";
+    public static final String ALERTNAME_LABEL_NAME = "alertname";
 }

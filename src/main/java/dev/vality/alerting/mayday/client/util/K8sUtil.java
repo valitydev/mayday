@@ -79,7 +79,7 @@ public class K8sUtil {
         return group;
     }
 
-    public static UnaryOperator<AlertmanagerConfig> getRemoveRouteByUserAndAlertFunc(String userId, String alertId) {
+    public static UnaryOperator<AlertmanagerConfig> getRemoveRouteByAlertIdFunc(String alertId) {
         return alertmanagerConfig -> {
             var routes = alertmanagerConfig.getSpec().getRoute().getRoutes();
             if (routes == null || routes.isEmpty()) {
@@ -89,9 +89,8 @@ public class K8sUtil {
             while (routesIterator.hasNext()) {
                 var route = routesIterator.next();
                 var matchers = route.getMatchers();
-                var userMatcher = createMatcher(PrometheusRuleAnnotation.USERNAME, userId);
                 var alertNameMatcher = createMatcher(PrometheusRuleAnnotation.ALERT_NAME, alertId);
-                if (matchers != null && matchers.contains(userMatcher) && matchers.contains(alertNameMatcher)) {
+                if (matchers != null && matchers.contains(alertNameMatcher)) {
                     routesIterator.remove();
                     break;
                 }
@@ -147,11 +146,12 @@ public class K8sUtil {
                 .anyMatch(childRoute -> childRoute.equals(route));
     }
 
-    private static AlertmanagerConfigSpec.Matcher createMatcher(String labelName, String labelValue) {
+    public static AlertmanagerConfigSpec.Matcher createMatcher(String labelName, String labelValue) {
         AlertmanagerConfigSpec.Matcher matcher = new AlertmanagerConfigSpec.Matcher();
         matcher.setName(labelName);
         matcher.setValue(labelValue);
         matcher.setMatchType("=");
+        matcher.setRegex(false);
         return matcher;
     }
 }

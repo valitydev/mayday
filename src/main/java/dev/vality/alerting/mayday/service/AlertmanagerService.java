@@ -3,11 +3,13 @@ package dev.vality.alerting.mayday.service;
 import dev.vality.alerting.mayday.client.K8sAlertmanagerClient;
 import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfig;
 import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfigSpec;
+import dev.vality.alerting.mayday.client.util.K8sUtil;
 import dev.vality.alerting.mayday.config.properties.KubernetesProperties;
 import dev.vality.alerting.mayday.config.properties.MaydayProperties;
 import dev.vality.alerting.mayday.constant.AlertConfigurationRequiredParameter;
 import dev.vality.alerting.mayday.constant.K8sParameter;
 import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
+import dev.vality.alerting.mayday.constant.PrometheusRuleLabel;
 import dev.vality.alerting.mayday.dto.CreateAlertDto;
 import dev.vality.alerting.mayday.util.FormatUtil;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -38,23 +40,22 @@ public class AlertmanagerService {
         route.setGroupBy(Set.of(PrometheusRuleAnnotation.ALERT_NAME));
         route.setGroupWait(ONE_SEC_WAIT);
         route.setGroupInterval(ONE_SEC_WAIT);
-        AlertmanagerConfigSpec.Matcher matcher = new AlertmanagerConfigSpec.Matcher();
-        matcher.setRegex(false);
-        matcher.setName(PrometheusRuleAnnotation.ALERT_NAME);
-        matcher.setValue(createAlertDto.getAlertId());
-        matcher.setMatchType("=");
-        route.setMatchers(Set.of(matcher));
+        var alertnameMatcher =
+                K8sUtil.createMatcher(PrometheusRuleLabel.ALERTNAME_LABEL_NAME, createAlertDto.getAlertId());
+        var usernameMatcher =
+                K8sUtil.createMatcher(PrometheusRuleLabel.USERNAME_LABEL_NAME, createAlertDto.getUserId());
+        route.setMatchers(Set.of(alertnameMatcher, usernameMatcher));
         route.setRepeatInterval(createAlertDto.getParameters()
                 .get(FormatUtil.formatMinutesDuration(
                         AlertConfigurationRequiredParameter.ALERT_REPEAT_MINUTES.getParameterTemplate())));
         k8sAlertmanagerClient.addRouteIfNotExists(ALERTMANAGER_CONFIG_NAME, route);
     }
 
-    public void deleteUserRoute(String userId, String alertId) {
+    public void deleteUserRoute(String alertId) {
         if (k8sAlertmanagerClient.getAlertmanagerConfig(ALERTMANAGER_CONFIG_NAME).isEmpty()) {
             return;
         }
-        k8sAlertmanagerClient.deleteRoute(ALERTMANAGER_CONFIG_NAME, userId, alertId);
+        k8sAlertmanagerClient.deleteRoute(ALERTMANAGER_CONFIG_NAME, alertId);
     }
 
     public void deleteUserRoutes(String userId) {

@@ -28,6 +28,7 @@ public class AlertmanagerController {
 
     @PostMapping(value = "/webhook", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity processWebhook(@RequestBody AlertmanagerWebhook webhook) {
+        log.info("Received webhook from alertmanager: {}", webhook);
         var notifications = webhookToNotificationsConverter.convert(webhook);
         for (Notification notification : notifications) {
             try {
@@ -39,6 +40,7 @@ public class AlertmanagerController {
                 return ResponseEntity.internalServerError().build();
             }
         }
+        log.info("Alertmanager webhook processed successfully: {}", webhook);
         return ResponseEntity.ok().build();
     }
 }

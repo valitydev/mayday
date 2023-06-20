@@ -16,7 +16,7 @@ public class FormatUtil {
     }
 
     public static String formatDuration(String value, TimeUnit timeUnit) {
-        return switch (timeUnit) {
+        String unit =  switch (timeUnit) {
             case MILLISECONDS -> "ms";
             case SECONDS -> "s";
             case MINUTES -> "m";
@@ -24,5 +24,6 @@ public class FormatUtil {
             case DAYS -> "d";
             default -> throw new IllegalArgumentException(timeUnit + " is not supported!");
         };
+        return value + unit;
     }
 }

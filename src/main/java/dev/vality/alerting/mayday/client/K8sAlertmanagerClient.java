@@ -69,8 +69,8 @@ public class K8sAlertmanagerClient {
         }
     }
 
-    public void deleteRoute(String configName, String userId, String alertId) {
-        modifyAlertmanagerConfig(configName, K8sUtil.getRemoveRouteByUserAndAlertFunc(userId, alertId));
+    public void deleteRoute(String configName, String alertId) {
+        modifyAlertmanagerConfig(configName, K8sUtil.getRemoveRouteByAlertIdFunc(alertId));
     }
 
     public void deleteRoutes(String configName, String userId) {

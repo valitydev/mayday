@@ -36,7 +36,7 @@ public class AlertingService implements AlertingServiceSrv.Iface {
     @Override
     public void deleteAlert(String userId, String alertId) {
         log.info("Removing alert '{}' for user '{}'", alertId, userId);
-        alertmanagerService.deleteUserRoute(userId, alertId);
+        alertmanagerService.deleteUserRoute(alertId);
         prometheusService.deleteUserAlert(userId, alertId);
         log.info("Removed alert '{}' for user '{}'", alertId, userId);
     }
