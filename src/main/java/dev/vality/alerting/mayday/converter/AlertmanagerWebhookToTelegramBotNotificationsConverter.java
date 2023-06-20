@@ -27,7 +27,7 @@ public class AlertmanagerWebhookToTelegramBotNotificationsConverter
         var annotations = alert.getAnnotations();
         return new Notification()
                 .setId(UUID.randomUUID().toString())
-                .setReceiverId(receiver)
+                .setReceiverId(alert.getAnnotations().get(PrometheusRuleAnnotation.USERNAME))
                 .setMessage(createMessage(alert.getStatus().equals("firing"), annotations));
     }
 
