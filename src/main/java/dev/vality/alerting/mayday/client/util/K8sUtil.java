@@ -33,7 +33,9 @@ public class K8sUtil {
                                                                                  String alertNameForRemoval) {
         return prometheusRule -> {
             var groups = prometheusRule.getSpec().getGroups();
-            for (PrometheusRuleSpec.Group group : groups) {
+            var groupIterator = groups.iterator();
+            while (groupIterator.hasNext()) {
+                var group = groupIterator.next();
                 if (group.getName().equals(groupName)) {
                     Set<PrometheusRuleSpec.Rule> alertRules = group.getRules();
                     var ruleIterator = alertRules.iterator();
@@ -43,6 +45,9 @@ public class K8sUtil {
                             ruleIterator.remove();
                             break;
                         }
+                    }
+                    if (group.getRules().isEmpty()) {
+                        groupIterator.remove();
                     }
                     break;
                 }
