@@ -68,6 +68,7 @@ public class AlertmanagerService {
     private AlertmanagerConfig buildAlertmanagerConfig() {
         AlertmanagerConfigSpec.Route rootRoute = new AlertmanagerConfigSpec.Route();
         rootRoute.setReceiver(K8sParameter.ALERTMANAGER_RECEIVER_NAME);
+        rootRoute.setMatchers(Set.of(K8sUtil.createMatcher("service", "mayday")));
         AlertmanagerConfigSpec.Receiver receiver = new AlertmanagerConfigSpec.Receiver();
         receiver.setName(K8sParameter.ALERTMANAGER_RECEIVER_NAME);
         var webhookConfig = new AlertmanagerConfigSpec.WebhookConfig();

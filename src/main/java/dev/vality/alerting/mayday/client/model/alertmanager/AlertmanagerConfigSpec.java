@@ -1,5 +1,6 @@
 package dev.vality.alerting.mayday.client.model.alertmanager;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +18,7 @@ public class AlertmanagerConfigSpec {
     @Data
     public static class Route {
         private String receiver;
+        private Set<Matcher> matchers;
         private Set<String> groupBy;
         private String groupWait;
         private String groupInterval;
