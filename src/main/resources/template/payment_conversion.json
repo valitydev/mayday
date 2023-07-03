@@ -1,7 +1,7 @@
 {
   "id": "payment_conversion",
   "readable_name": "Конверсия платежей",
-  "prometheus_query": "round(100 * sum(sum_over_time(ebm_payments_count{provider_id=~\"${provider_id}\", terminal_id=~\"${terminal_id}\",shop_id=~\"${shop_id}\",status=\"captured\"}[${conversion_period_minutes}m])) / sum(sum_over_time(ebm_payments_count{provider_id=~\"${provider_id}\",terminal_id=~\"${terminal_id}\",shop_id=~\"${shop_id}\",status=~\"captured|failed\"}[${conversion_period_minutes}m])), 1) ${boundary_type} ${conversion_rate_threshold}'",
+  "prometheus_query": "round(100 * sum(sum_over_time(ebm_payments_count{provider_id=~\"${provider_id}\", terminal_id=~\"${terminal_id}\",shop_id=~\"${shop_id}\",status=\"captured\"}[${conversion_period_minutes}m])) / sum(sum_over_time(ebm_payments_count{provider_id=~\"${provider_id}\",terminal_id=~\"${terminal_id}\",shop_id=~\"${shop_id}\",status=~\"captured|failed\"}[${conversion_period_minutes}m])), 1) ${boundary_type} ${conversion_rate_threshold}",
   "alert_name_template": "Конверсия платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' за последние ${conversion_period_minutes} минут ${boundary_type} ${conversion_rate_threshold}%",
   "alert_notification_template": "Конверсия платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' за последние ${conversion_period_minutes} минут ${boundary_type} ${conversion_rate_threshold}%! Текущее значение: {{ $value }}%",
   "parameters": [
