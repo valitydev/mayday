@@ -56,6 +56,7 @@ public class PrometheusService {
             k8SPrometheusClient.createPrometheusRule(buildPrometheusRule());
         }
         PrometheusRuleSpec.Rule alertRule = createAlertDtoToPrometheusRuleConverter.convert(createAlertDto);
+        log.info("New alert configuration: {}", alertRule);
         k8SPrometheusClient.addAlertToPrometheusRuleGroup(PROMETHEUS_RULE_NAME, createAlertDto.getUserId(), alertRule);
     }
 

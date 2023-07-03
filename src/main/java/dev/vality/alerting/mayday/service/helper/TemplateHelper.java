@@ -8,6 +8,7 @@ import dev.vality.alerting.mayday.error.AlertConfigurationException;
 import dev.vality.alerting.mayday.model.alerttemplate.AlertTemplate;
 import dev.vality.alerting.mayday.service.DictionaryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
@@ -15,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TemplateHelper {
@@ -31,6 +33,7 @@ public class TemplateHelper {
 
         Map<String, String> parameters = mergeParameters(createAlertRequest.getParameters(), metricParams);
         String queryExpression = prepareMetricExpression(metricTemplate, parameters);
+        log.debug("Prepared prometheus expression: {}", queryExpression);
         String alertId = generateAlertId(createAlertRequest, queryExpression);
 
         //TODO: validation on required params? validate types correctness?
