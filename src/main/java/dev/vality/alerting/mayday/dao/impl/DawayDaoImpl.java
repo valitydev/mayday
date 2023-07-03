@@ -38,7 +38,7 @@ public class DawayDaoImpl implements DawayDao {
     @Override
     public List<Shop> getShops() {
         return jdbcTemplate
-                .query("select shop_id, details_name from dw.shop where current = true", shopRowMapper);
+                .query("select distinct (shop_id), details_name from dw.shop where current = true", shopRowMapper);
     }
 
     @Override
