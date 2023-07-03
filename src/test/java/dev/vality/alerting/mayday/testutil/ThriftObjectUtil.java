@@ -3,7 +3,6 @@ package dev.vality.alerting.mayday.testutil;
 import dev.vality.alerting.mayday.AlertConfiguration;
 import dev.vality.alerting.mayday.CreateAlertRequest;
 import dev.vality.alerting.mayday.ParameterInfo;
-import dev.vality.alerting.mayday.ParameterValue;
 import lombok.experimental.UtilityClass;
 
 import java.util.UUID;
@@ -19,8 +18,8 @@ public class ThriftObjectUtil {
         request.setParameters(
                 alertConfiguration.getParameters().stream().map(parameterConfiguration -> {
                     var paramInfo = new ParameterInfo();
-                    paramInfo.setType(ParameterValue.str(UUID.randomUUID().toString()));
                     paramInfo.setId(parameterConfiguration.getId());
+                    paramInfo.setValue(UUID.randomUUID().toString());
                     return paramInfo;
                 }).collect(Collectors.toList()));
         return request;

@@ -3,15 +3,20 @@ package dev.vality.alerting.mayday.constant;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Every alert configuration includes all of these parameters
+ */
 @Getter
 @RequiredArgsConstructor
 public enum AlertConfigurationRequiredParameter {
 
     RULE_CHECK_DURATION_MINUTES("rule_check_duration_minutes", "Как долго условие должно выполняться (в минутах)," +
             "прежде чем " +
-            "отправить уведомление?"),
-    ALERT_REPEAT_MINUTES("alert_repeat_minutes", "Как часто присылать повторные уведомления (в минутах)?");
+            "отправить уведомление?",
+            "^\\d+$"),
+    ALERT_REPEAT_MINUTES("alert_repeat_minutes", "Как часто присылать повторные уведомления (в минутах)?", "^\\d+$");
 
-    private final String parameterTemplate;
-    private final String parameterName;
+    private final String substitutionName;
+    private final String readableName;
+    private final String regexp;
 }

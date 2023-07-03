@@ -23,6 +23,8 @@ public class AlertmanagerConfigSpec {
         private String groupWait;
         private String groupInterval;
         private String repeatInterval;
+        @JsonProperty("continue")
+        private Boolean continueRouteLookUp;
         private Set<ChildRoute> routes = new HashSet<>();
     }
 

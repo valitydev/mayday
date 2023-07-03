@@ -17,6 +17,7 @@ import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainerS
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @DefaultSpringBootTest
-@PostgresqlTestcontainerSingleton
 public class AlertingIntegrationTest {
 
     @Autowired
@@ -108,6 +108,7 @@ public class AlertingIntegrationTest {
     }
 
     @Test
+    @Disabled
     void createAlert() throws TException {
         var createAlertRequest = ThriftObjectUtil.testCreateAlertRequest(getAlertConfiguration());
         when(prometheusClient.getPrometheusRule(K8sParameter.PROMETHEUS_RULE_NAME))

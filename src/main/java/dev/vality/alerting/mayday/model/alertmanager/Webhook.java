@@ -1,4 +1,4 @@
-package dev.vality.alerting.mayday.model;
+package dev.vality.alerting.mayday.model.alertmanager;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class AlertmanagerWebhook {
+public class Webhook {
 
     private String status;
     private String receiver;
