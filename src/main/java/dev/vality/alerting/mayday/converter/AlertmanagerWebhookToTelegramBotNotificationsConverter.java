@@ -2,7 +2,7 @@ package dev.vality.alerting.mayday.converter;
 
 import dev.vality.alerting.mayday.constant.NotificationPrefix;
 import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
-import dev.vality.alerting.mayday.model.AlertmanagerWebhook;
+import dev.vality.alerting.mayday.model.alertmanager.Webhook;
 import dev.vality.alerting.tg_bot.Notification;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
@@ -14,16 +14,16 @@ import java.util.stream.Collectors;
 
 @Component
 public class AlertmanagerWebhookToTelegramBotNotificationsConverter
-        implements Converter<AlertmanagerWebhook, List<Notification>> {
+        implements Converter<Webhook, List<Notification>> {
     @Override
-    public List<Notification> convert(AlertmanagerWebhook source) {
+    public List<Notification> convert(Webhook source) {
         //TODO: throw exception if more than 1 notification?
         return source.getAlerts().stream()
                 .map(alert -> convertAlertToNotification(source.getReceiver(), alert))
                 .collect(Collectors.toList());
     }
 
-    private Notification convertAlertToNotification(String receiver, AlertmanagerWebhook.Alert alert) {
+    private Notification convertAlertToNotification(String receiver, Webhook.Alert alert) {
         var annotations = alert.getAnnotations();
         return new Notification()
                 .setId(UUID.randomUUID().toString())

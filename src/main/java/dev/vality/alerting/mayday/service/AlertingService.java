@@ -1,15 +1,15 @@
 package dev.vality.alerting.mayday.service;
 
 import dev.vality.alerting.mayday.*;
-import dev.vality.alerting.mayday.domain.tables.pojos.AlertParam;
-import dev.vality.alerting.mayday.domain.tables.pojos.AlertTemplate;
 import dev.vality.alerting.mayday.dto.CreateAlertDto;
+import dev.vality.alerting.mayday.model.alerttemplate.AlertTemplate;
 import dev.vality.alerting.mayday.service.helper.TemplateHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,8 +22,11 @@ public class AlertingService implements AlertingServiceSrv.Iface {
     private final PrometheusService prometheusService;
     private final AlertmanagerService alertmanagerService;
 
+    private final TemplateHelper templateHelper;
+
     private final Converter<AlertTemplate, Alert> alertTemplateAlertConverter;
-    private final Converter<List<AlertParam>, AlertConfiguration> alertParamsToAlertConfiguration;
+    private final Converter<List<AlertTemplate.AlertConfigurationParameter>, AlertConfiguration>
+            alertParamsToAlertConfiguration;
 
     @Override
     public void deleteAllAlerts(String userId) {
@@ -52,9 +55,13 @@ public class AlertingService implements AlertingServiceSrv.Iface {
     @Override
     public List<Alert> getSupportedAlerts() {
         log.info("Retrieving all supported alerts");
-        List<AlertTemplate> metricTemplates = templateService.getAlertTemplates();
+        List<dev.vality.alerting.mayday.model.alerttemplate.AlertTemplate> metricTemplates =
+                templateService.getAlertTemplates();
         List<Alert> supportedAlerts =
-                metricTemplates.stream().map(alertTemplateAlertConverter::convert).collect(Collectors.toList());
+                metricTemplates.stream()
+                        .map(alertTemplateAlertConverter::convert)
+                        .sorted(Comparator.comparing(a -> a.getName()))
+                        .collect(Collectors.toList());
         log.info("Retrieved {} supported alerts", supportedAlerts.size());
         return supportedAlerts;
     }
@@ -62,7 +69,8 @@ public class AlertingService implements AlertingServiceSrv.Iface {
     @Override
     public AlertConfiguration getAlertConfiguration(String alertTemplateId) {
         log.info("Retrieving configuration for alert '{}'", alertTemplateId);
-        List<AlertParam> metricParams = templateService.getAlertTemplateParams(alertTemplateId);
+        List<AlertTemplate.AlertConfigurationParameter> metricParams =
+                templateService.getAlertTemplateParams(alertTemplateId);
         AlertConfiguration alertConfiguration = alertParamsToAlertConfiguration.convert(metricParams);
         alertConfiguration.setId(alertTemplateId);
         log.info("Successfully retrieved configuration for alert '{}': {}", alertTemplateId, alertConfiguration);
@@ -72,11 +80,12 @@ public class AlertingService implements AlertingServiceSrv.Iface {
     @Override
     public void createAlert(CreateAlertRequest createAlertRequest) {
         log.info("Processing CreateAlertRequest: '{}'", createAlertRequest);
-        List<AlertParam> metricParams = templateService.getAlertTemplateParams(createAlertRequest.getAlertId());
+        List<AlertTemplate.AlertConfigurationParameter> metricParams =
+                templateService.getAlertTemplateParams(createAlertRequest.getAlertId());
         AlertTemplate metricTemplate =
                 templateService.getAlertTemplateById(createAlertRequest.getAlertId());
         CreateAlertDto createAlertDto =
-                TemplateHelper.preparePrometheusRuleData(createAlertRequest, metricTemplate, metricParams);
+                templateHelper.preparePrometheusRuleData(createAlertRequest, metricTemplate, metricParams);
         prometheusService.createUserAlert(createAlertDto);
         alertmanagerService.createUserRoute(createAlertDto);
         log.info("CreateAlertRequest processed successfully: '{}'", createAlertRequest);

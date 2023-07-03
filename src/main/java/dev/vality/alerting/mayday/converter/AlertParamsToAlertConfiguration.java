@@ -2,10 +2,10 @@ package dev.vality.alerting.mayday.converter;
 
 import dev.vality.alerting.mayday.AlertConfiguration;
 import dev.vality.alerting.mayday.ParameterConfiguration;
-import dev.vality.alerting.mayday.ParameterType;
 import dev.vality.alerting.mayday.constant.AlertConfigurationRequiredParameter;
-import dev.vality.alerting.mayday.domain.enums.AlertParamType;
-import dev.vality.alerting.mayday.domain.tables.pojos.AlertParam;
+import dev.vality.alerting.mayday.model.alerttemplate.AlertTemplate;
+import dev.vality.alerting.mayday.service.DictionaryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -14,34 +14,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class AlertParamsToAlertConfiguration implements Converter<List<AlertParam>, AlertConfiguration> {
+@RequiredArgsConstructor
+public class AlertParamsToAlertConfiguration implements Converter<List<AlertTemplate.AlertConfigurationParameter>,
+        AlertConfiguration> {
+
+    private final DictionaryService dictionaryService;
+
     @Override
-    public AlertConfiguration convert(List<AlertParam> alertParams) {
+    public AlertConfiguration convert(List<AlertTemplate.AlertConfigurationParameter> alertParams) {
         var alertConfiguration = new AlertConfiguration();
         alertConfiguration.setParameters(alertParams.stream().map(param -> new ParameterConfiguration()
                         .setId(param.getId().toString())
-                        .setName(param.getDisplayName())
-                        .setType(mapToParameterType(param.getParameterType())))
+                        .setName(param.getReadableName())
+                        .setMandatory(param.getMandatory())
+                        .setValueRegexp(param.getRegexp())
+                        .setOptions(param.getDictionaryName() != null ? dictionaryService
+                                .getDictionary(param.getDictionaryName()).keySet().stream().toList()
+                                : null))
                 .collect(Collectors.toList()));
-
-        alertConfiguration.getParameters().addAll(
-                Arrays.stream(AlertConfigurationRequiredParameter.values())
-                        .map(alertConfigurationRequiredParameter -> {
-                            var paramConfiguration = new ParameterConfiguration();
-                            paramConfiguration.setType(ParameterType.str);
-                            paramConfiguration.setId(alertConfigurationRequiredParameter.getParameterTemplate());
-                            paramConfiguration.setName(alertConfigurationRequiredParameter.getParameterName());
-                            return paramConfiguration;
-                        }).toList());
+        alertConfiguration.getParameters().addAll(Arrays.stream(AlertConfigurationRequiredParameter.values())
+                .map(requiredParameter ->
+                        new ParameterConfiguration()
+                                .setId(requiredParameter.getSubstitutionName())
+                                .setName(requiredParameter.getReadableName())
+                                .setMandatory(true)
+                                .setValueRegexp(requiredParameter.getRegexp())
+        ).toList());
         return alertConfiguration;
-    }
-
-    private ParameterType mapToParameterType(AlertParamType alertParamType) {
-        return switch (alertParamType) {
-            case bl -> ParameterType.bl;
-            case fl -> ParameterType.fl;
-            case str -> ParameterType.str;
-            case integer -> ParameterType.integer;
-        };
     }
 }

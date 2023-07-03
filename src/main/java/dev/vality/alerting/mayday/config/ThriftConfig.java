@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import java.io.IOException;
 
 @Configuration
-public class AppConfig {
+public class ThriftConfig {
 
     @Bean
     public NotifierServiceSrv.Iface telegramBotClient(TelegramBotProperties properties) throws IOException {

@@ -29,16 +29,9 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.postgresql.Driver
-    url: '${db.url}'
-    username: '${db.user}'
-    password: '${db.password}'
-    hikari:
-      idle-timeout: 30000
-      maximum-pool-size: 30
-  flyway:
-    placeholder-replacement: false
-    table: schema_version
-    schemas: md
+    url: jdbc:postgresql://localhost:5432/daway
+    username: postgres
+    password: postgres
 
 mayday:
   webhook-url: http://localhost:8022

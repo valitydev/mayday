@@ -1,0 +1,51 @@
+{
+  "id": "payment_conversion",
+  "readable_name": "Конверсия платежей",
+  "prometheus_query": "round(100 * sum(sum_over_time(ebm_payments_count{provider_id=~\"${provider_id}\", terminal_id=~\"${terminal_id}\",shop_id=~\"${shop_id}\",status=\"captured\"}[${conversion_period_minutes}m])) / sum(sum_over_time(ebm_payments_count{provider_id=~\"${provider_id}\",terminal_id=~\"${terminal_id}\",shop_id=~\"${shop_id}\",status=~\"captured|failed\"}[${conversion_period_minutes}m])), 1) ${boundary_type} ${conversion_rate_threshold}'",
+  "alert_name_template": "Конверсия платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' за последние ${conversion_period_minutes} минут ${boundary_type} ${conversion_rate_threshold}%",
+  "alert_notification_template": "Конверсия платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' за последние ${conversion_period_minutes} минут ${boundary_type} ${conversion_rate_threshold}%! Текущее значение: {{ $value }}%",
+  "parameters": [
+    {
+      "id": 1,
+      "substitution_name": "provider_id",
+      "readable_name": "Введите идентификатор провайдера (опционально)",
+      "mandatory": false,
+      "dictionary_name": "providers"
+    },
+    {
+      "id": 2,
+      "substitution_name": "terminal_id",
+      "readable_name": "Введите идентификатор терминала (опционально)",
+      "mandatory": false,
+      "dictionary_name": "terminals"
+    },
+    {
+      "id": 3,
+      "substitution_name": "shop_id",
+      "readable_name": "Введите идентификатор магазина (опционально)",
+      "mandatory": false,
+      "dictionary_name": "shops"
+    },
+    {
+      "id": 4,
+      "substitution_name": "boundary_type",
+      "readable_name": "Выберите тип условия для алерта",
+      "mandatory": true,
+      "dictionary_name": "boundaries"
+    },
+    {
+      "id": 5,
+      "substitution_name": "conversion_rate_threshold",
+      "readable_name": "Введите порог конверсии в процентах",
+      "mandatory": true,
+      "regexp": "^[0-9][0-9]?$|^100$"
+    },
+    {
+      "id": 6,
+      "substitution_name": "conversion_period_minutes",
+      "readable_name": "Период в минутах, за который необходимо проверять конверсию (Пример: 60)",
+      "mandatory": true,
+      "regexp": "^\\d+$"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 package dev.vality.alerting.mayday.controller;
 
-import dev.vality.alerting.mayday.model.AlertmanagerWebhook;
+import dev.vality.alerting.mayday.model.alertmanager.Webhook;
 import dev.vality.alerting.tg_bot.Notification;
 import dev.vality.alerting.tg_bot.NotifierServiceSrv;
 import dev.vality.alerting.tg_bot.ReceiverNotFound;
@@ -24,10 +24,10 @@ import java.util.List;
 public class AlertmanagerController {
 
     private final NotifierServiceSrv.Iface telegramBotClient;
-    private final Converter<AlertmanagerWebhook, List<Notification>> webhookToNotificationsConverter;
+    private final Converter<Webhook, List<Notification>> webhookToNotificationsConverter;
 
     @PostMapping(value = "/webhook", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity processWebhook(@RequestBody AlertmanagerWebhook webhook) {
+    public ResponseEntity processWebhook(@RequestBody Webhook webhook) {
         log.info("Received webhook from alertmanager: {}", webhook);
         var notifications = webhookToNotificationsConverter.convert(webhook);
         for (Notification notification : notifications) {
