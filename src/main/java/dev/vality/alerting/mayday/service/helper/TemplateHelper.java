@@ -23,6 +23,7 @@ public class TemplateHelper {
 
     //TODO: do not pass from client empty params;
     private static final String emptyValue = "-";
+    private static final String multiValueDelimiter = "|";
 
     private final DictionaryService dictionaryService;
 
@@ -31,7 +32,7 @@ public class TemplateHelper {
                                                     List<AlertTemplate.AlertConfigurationParameter>
                                                             metricParams) {
 
-        Map<String, String> parameters = mergeParameters(createAlertRequest.getParameters(), metricParams);
+        Map<String, List<String>> parameters = mergeParameters(createAlertRequest.getParameters(), metricParams);
         String queryExpression = prepareMetricExpression(metricTemplate, parameters);
         log.debug("Prepared prometheus expression: {}", queryExpression);
         String alertId = generateAlertId(createAlertRequest, queryExpression);
@@ -48,40 +49,53 @@ public class TemplateHelper {
                 .formattedDurationMinutes(
                         formatDuration(parameters
                                 .get(AlertConfigurationRequiredParameter.RULE_CHECK_DURATION_MINUTES
-                                        .getSubstitutionName())))
+                                        .getSubstitutionName()).get(0)))
                 .build();
     }
 
-    private Map<String, String> mergeParameters(List<ParameterInfo> externalParamsInfo,
-                                                List<AlertTemplate.AlertConfigurationParameter>
-                                                        maydayParamsInfo) {
-        Map<String, String> params = maydayParamsInfo.stream()
+    private Map<String, List<String>> mergeParameters(List<ParameterInfo> externalParamsInfo,
+                                                      List<AlertTemplate.AlertConfigurationParameter>
+                                                              maydayParamsInfo) {
+        Map<String, List<String>> params = maydayParamsInfo.stream()
                 .map(maydayParamInfo -> {
-                            var externalParamInfo = externalParamsInfo.stream()
+                            var externalParamInfos = externalParamsInfo.stream()
                                     .filter(userParamInfo ->
                                             maydayParamInfo.getId().toString().equals(userParamInfo.getId()))
-                                    .findFirst();
+                                    .toList();
 
-                            if (hasNoValue(externalParamInfo) && maydayParamInfo.getMandatory()) {
+                            if (externalParamInfos.size() > 1 && !maydayParamInfo.getMultipleValues()) {
+                                throw new AlertConfigurationException(String.format("Parameter '%s' cannot have " +
+                                        "multiple values!", maydayParamInfo.getSubstitutionName()));
+                            }
+
+                            if ((externalParamInfos.isEmpty() || externalParamInfos.size() == 1
+                                    && hasNoValue(externalParamInfos.get(0))) && maydayParamInfo.getMandatory()) {
                                 throw new AlertConfigurationException("Unable to find required" +
                                         " parameter: " + maydayParamInfo.getSubstitutionName());
                             }
 
-                            String value = hasNoValue(externalParamInfo) ? ".*" : externalParamInfo.get().getValue();
-                            if (!hasNoValue(externalParamInfo) && maydayParamInfo.getDictionaryName() != null) {
-                                value = dictionaryService.getDictionary(maydayParamInfo.getDictionaryName()).get(value);
+                            List<String> values = new ArrayList<>();
+                            if (!maydayParamInfo.getMandatory() && externalParamInfos.size() == 1) {
+                                values.add(hasNoValue(externalParamInfos.get(0)) ? ".*" :
+                                        getDictionaryValueIfRequired(maydayParamInfo, externalParamInfos.get(0)));
+                            } else if (externalParamInfos.size() > 1) {
+                                externalParamInfos.stream()
+                                        .filter(parameterInfo -> !hasNoValue(parameterInfo))
+                                        .map(parameterInfo -> getDictionaryValueIfRequired(maydayParamInfo,
+                                                parameterInfo))
+                                        .forEach(values::add);
                             }
-                            return new String[]{maydayParamInfo.getSubstitutionName(),
-                                    value};
+                            return Map.of(maydayParamInfo.getSubstitutionName(),
+                                    values);
                         }
-                )
-                .collect(Collectors.toMap(strings -> strings[0], strings -> strings[1]));
+                ).flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         //Required parameters
         Arrays.stream(AlertConfigurationRequiredParameter.values()).forEach(
                 requiredParameter -> {
                     var param = getRequiredParameter(requiredParameter.getSubstitutionName(), externalParamsInfo);
-                    params.put(param.getId(), param.getValue());
+                    params.put(param.getId(), List.of(param.getValue()));
                 }
         );
         return params;
@@ -100,25 +114,35 @@ public class TemplateHelper {
                 .getBytes(StandardCharsets.UTF_8));
     }
 
-    private String prepareMetricExpression(AlertTemplate metricTemplate, Map<String, String> parameters) {
+    private String prepareMetricExpression(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
         return prepareTemplate(metricTemplate.getPrometheusQuery(), parameters);
     }
 
-    private String prepareUserFriendlyAlertName(AlertTemplate metricTemplate, Map<String, String> parameters) {
+    private String prepareUserFriendlyAlertName(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
         return prepareTemplate(metricTemplate.getAlertNameTemplate(), parameters);
     }
 
-    private String prepareMetricAlertMessage(AlertTemplate metricTemplate, Map<String, String> parameters) {
+    private String prepareMetricAlertMessage(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
         return prepareTemplate(metricTemplate.getAlertNotificationTemplate(), parameters);
     }
 
-    private String prepareTemplate(String template, Map<String, String> replacements) {
+    private String prepareTemplate(String template, Map<String, List<String>> replacements) {
         String preparedTemplate = template;
         var replacementsEntries = replacements.entrySet();
-        for (Map.Entry<String, String> entry : replacementsEntries) {
-            preparedTemplate = preparedTemplate.replace(formatReplacementVariable(entry.getKey()), entry.getValue());
+        for (Map.Entry<String, List<String>> entry : replacementsEntries) {
+            String value = entry.getValue().size() == 1
+                    ? entry.getValue().get(0) : String.join(multiValueDelimiter, entry.getValue());
+            preparedTemplate = preparedTemplate.replace(formatReplacementVariable(entry.getKey()), value);
         }
         return preparedTemplate;
+    }
+
+    private String getDictionaryValueIfRequired(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
+                                                ParameterInfo userParamInfo) {
+        if (maydayParamInfo.getDictionaryName() != null) {
+            return dictionaryService.getDictionary(maydayParamInfo.getDictionaryName()).get(userParamInfo.getValue());
+        }
+        return userParamInfo.getValue();
     }
 
     private String formatReplacementVariable(String variableName) {
@@ -129,7 +153,7 @@ public class TemplateHelper {
         return durationInMinutes + "m";
     }
 
-    private boolean hasNoValue(Optional<ParameterInfo> parameterInfo) {
-        return parameterInfo.isEmpty() || emptyValue.equals(parameterInfo.get().getValue());
+    private boolean hasNoValue(ParameterInfo parameterInfo) {
+        return emptyValue.equals(parameterInfo.getValue());
     }
 }

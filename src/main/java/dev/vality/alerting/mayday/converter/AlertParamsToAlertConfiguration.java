@@ -30,7 +30,8 @@ public class AlertParamsToAlertConfiguration implements Converter<List<AlertTemp
                         .setValueRegexp(param.getRegexp())
                         .setOptions(param.getDictionaryName() != null ? dictionaryService
                                 .getDictionary(param.getDictionaryName()).keySet().stream().toList()
-                                : null))
+                                : null)
+                        .setMultipleValues(param.getMultipleValues()))
                 .collect(Collectors.toList()));
         alertConfiguration.getParameters().addAll(Arrays.stream(AlertConfigurationRequiredParameter.values())
                 .map(requiredParameter ->

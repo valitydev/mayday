@@ -10,6 +10,7 @@
       "substitution_name": "provider_id",
       "readable_name": "Введите идентификатор провайдера (опционально)",
       "mandatory": false,
+      "multiple_values": true,
       "dictionary_name": "providers"
     },
     {
@@ -17,6 +18,7 @@
       "substitution_name": "terminal_id",
       "readable_name": "Введите идентификатор терминала (опционально)",
       "mandatory": false,
+      "multiple_values": true,
       "dictionary_name": "terminals"
     },
     {
@@ -24,6 +26,7 @@
       "substitution_name": "shop_id",
       "readable_name": "Введите идентификатор магазина (опционально)",
       "mandatory": false,
+      "multiple_values": true,
       "dictionary_name": "shops"
     },
     {

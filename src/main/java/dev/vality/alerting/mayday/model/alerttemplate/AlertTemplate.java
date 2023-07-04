@@ -38,6 +38,8 @@ public class AlertTemplate {
         private final String readableName;
         @NotNull
         private final Boolean mandatory;
+        @JsonProperty(value = "multiple_values")
+        private final Boolean multipleValues = false;
         @JsonProperty("dictionary_name")
         private final DictionaryType dictionaryName;
         private final String regexp;
