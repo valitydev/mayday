@@ -2,10 +2,7 @@ package dev.vality.alerting.mayday.service;
 
 import dev.vality.alerting.mayday.constant.DictionaryType;
 import dev.vality.alerting.mayday.dao.DawayDao;
-import dev.vality.alerting.mayday.model.daway.Provider;
-import dev.vality.alerting.mayday.model.daway.Shop;
-import dev.vality.alerting.mayday.model.daway.Terminal;
-import dev.vality.alerting.mayday.model.daway.Wallet;
+import dev.vality.alerting.mayday.model.daway.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +22,9 @@ public class DictionaryService {
             case PROVIDERS -> convertProvidersToDictionary(dawayDao.getProviders());
             case WALLETS -> convertWalletsToDictionary(dawayDao.getWallets());
             case SHOPS -> convertShopsToDictionary(dawayDao.getShops());
-            case BOUNDARIES -> Map.of("Больше порогового значения", ">", "Меньше порогового значения", "<");
+            case CURRENCIES -> convertCurrenciesToDictionary(dawayDao.getCurrencies());
+            case CONDITIONAL_BOUNDARIES -> Map.of("Больше порогового значения", ">", "Меньше порогового значения", "<");
+            case TIME_INTERVAL_BOUNDARIES -> Map.of("Да", "unless", "Нет", "and");
         };
     }
 
@@ -55,6 +54,13 @@ public class DictionaryService {
                 .collect(Collectors.toMap(
                         shop -> formatDictionaryKey(shop.getId(), shop.getName()),
                         Shop::getId));
+    }
+
+    private Map<String, String> convertCurrenciesToDictionary(List<Currency> currencies) {
+        return currencies.stream()
+                .collect(Collectors.toMap(
+                        currency -> formatDictionaryKey(currency.getSymbolicCode(), currency.getName()),
+                        Currency::getSymbolicCode));
     }
 
     private String formatDictionaryKey(String id, String description) {

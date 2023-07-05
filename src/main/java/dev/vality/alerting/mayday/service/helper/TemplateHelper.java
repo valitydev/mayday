@@ -48,8 +48,8 @@ public class TemplateHelper {
                 .parameters(parameters)
                 .formattedDurationMinutes(
                         formatDuration(parameters
-                                .get(AlertConfigurationRequiredParameter.RULE_CHECK_DURATION_MINUTES
-                                        .getSubstitutionName()).get(0)))
+                                .get(String.valueOf(AlertConfigurationRequiredParameter.RULE_CHECK_DURATION_MINUTES
+                                        .getSubstitutionName())).get(0)))
                 .build();
     }
 
@@ -78,7 +78,7 @@ public class TemplateHelper {
                             if (!maydayParamInfo.getMandatory() && externalParamInfos.size() == 1) {
                                 values.add(hasNoValue(externalParamInfos.get(0)) ? ".*" :
                                         getDictionaryValueIfRequired(maydayParamInfo, externalParamInfos.get(0)));
-                            } else if (externalParamInfos.size() > 1) {
+                            } else {
                                 externalParamInfos.stream()
                                         .filter(parameterInfo -> !hasNoValue(parameterInfo))
                                         .map(parameterInfo -> getDictionaryValueIfRequired(maydayParamInfo,
@@ -94,8 +94,8 @@ public class TemplateHelper {
         //Required parameters
         Arrays.stream(AlertConfigurationRequiredParameter.values()).forEach(
                 requiredParameter -> {
-                    var param = getRequiredParameter(requiredParameter.getSubstitutionName(), externalParamsInfo);
-                    params.put(param.getId(), List.of(param.getValue()));
+                    var param = getRequiredParameter(String.valueOf(requiredParameter.getId()), externalParamsInfo);
+                    params.put(requiredParameter.getSubstitutionName(), List.of(param.getValue()));
                 }
         );
         return params;

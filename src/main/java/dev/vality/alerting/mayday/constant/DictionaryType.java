@@ -1,7 +1,6 @@
 package dev.vality.alerting.mayday.constant;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -16,6 +15,10 @@ public enum DictionaryType {
     @JsonProperty("shops")
     SHOPS,
     @JsonProperty("boundaries")
-    BOUNDARIES;
+    CONDITIONAL_BOUNDARIES,
+    @JsonProperty("currencies")
+    CURRENCIES,
+    @JsonProperty("time_interval_boundaries")
+    TIME_INTERVAL_BOUNDARIES;
 
 }

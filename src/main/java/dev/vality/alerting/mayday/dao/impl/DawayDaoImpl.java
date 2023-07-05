@@ -1,10 +1,7 @@
 package dev.vality.alerting.mayday.dao.impl;
 
 import dev.vality.alerting.mayday.dao.DawayDao;
-import dev.vality.alerting.mayday.model.daway.Provider;
-import dev.vality.alerting.mayday.model.daway.Shop;
-import dev.vality.alerting.mayday.model.daway.Terminal;
-import dev.vality.alerting.mayday.model.daway.Wallet;
+import dev.vality.alerting.mayday.model.daway.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,6 +17,7 @@ public class DawayDaoImpl implements DawayDao {
     private final RowMapper<Terminal> terminalRowMapper;
     private final RowMapper<Shop> shopRowMapper;
     private final RowMapper<Wallet> walletRowMapper;
+    private final RowMapper<Currency> currencyRowMapper;
     private final JdbcTemplate jdbcTemplate;
 
 
@@ -45,5 +43,11 @@ public class DawayDaoImpl implements DawayDao {
     public List<Wallet> getWallets() {
         return jdbcTemplate
                 .query("select wallet_id, wallet_name from dw.wallet where current = true", walletRowMapper);
+    }
+
+    @Override
+    public List<Currency> getCurrencies() {
+        return jdbcTemplate
+                .query("select symbolic_code, name from dw.currency where current = true", currencyRowMapper);
     }
 }

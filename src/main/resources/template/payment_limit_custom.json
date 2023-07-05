@@ -1,0 +1,75 @@
+{
+  "id": "payment_limit_custom_hours",
+  "readable_name": "Оборот (эквайринг) в определенные часы",
+  "prometheus_query": "sum(sum_over_time(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\"}[${sum_period_hours}h])) OR on() vector(0) ${boundary_type} ${amount_threshold} ${time_interval_boundary} hour() >= ${time_interval_start_hour} < ${time_interval_end_hour}",
+  "alert_name_template": "Оборот платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' за последние ${sum_period_hours} часов ${boundary_type} ${amount_threshold}. Временной интервал с ${time_interval_start_hour} по ${time_interval_end_hour}",
+  "alert_notification_template": "Оборот платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' в интервале с ${time_interval_start_hour} по ${time_interval_end_hour} за последние ${sum_period_hours} часов ${boundary_type} ${amount_threshold}! Текущее значение: {{ $value }}",
+  "parameters": [
+    {
+      "id": 1,
+      "substitution_name": "provider_id",
+      "readable_name": "Введите идентификатор провайдера (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "providers"
+    },
+    {
+      "id": 2,
+      "substitution_name": "terminal_id",
+      "readable_name": "Введите идентификатор терминала (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "terminals"
+    },
+    {
+      "id": 3,
+      "substitution_name": "shop_id",
+      "readable_name": "Введите идентификатор магазина (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "shops"
+    },
+    {
+      "id": 4,
+      "substitution_name": "sum_period_hours",
+      "readable_name": "Период в часах, за который необходимо считать сумму по всем успешным платежам (Пример: 1)",
+      "mandatory": true,
+      "regexp": "^\\d+$"
+    },
+    {
+      "id": 5,
+      "substitution_name": "amount_threshold",
+      "readable_name": "Введите пороговое значение суммы",
+      "mandatory": true,
+      "regexp": "^\\d+$"
+    },
+    {
+      "id": 6,
+      "substitution_name": "boundary_type",
+      "readable_name": "Выберите тип условия для алерта",
+      "mandatory": true,
+      "dictionary_name": "boundaries"
+    },
+    {
+      "id": 7,
+      "substitution_name": "time_interval_start_hour",
+      "readable_name": "Введите начало временного интервала в часовом поясе UTC (часы в формате 0-23), когда необходимо проверять сумму. Если вы хотите проверять сумму платежей на протяжении всего дня, введите 0.",
+      "mandatory": true,
+      "regexp": "^2[0-3]|1[0-9]|[0-9]"
+    },
+    {
+      "id": 8,
+      "substitution_name": "time_interval_end_hour",
+      "readable_name": "Введите конец временного интервала в часовом поясе UTC (часы в формате 0-23), когда необходимо проверять сумму. Если вы хотите проверять сумму платежей на протяжении всего дня, введите 0.",
+      "mandatory": true,
+      "regexp": "^2[0-3]|1[0-9]|[0-9]"
+    },
+    {
+      "id": 9,
+      "substitution_name": "time_interval_boundary",
+      "readable_name": "Временной интервал, указанный вами, захватывает несколько календарных дней/целый календарный день?",
+      "mandatory": true,
+      "dictionary_name": "time_interval_boundaries"
+    }
+  ]
+}

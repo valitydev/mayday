@@ -36,7 +36,7 @@ public class AlertParamsToAlertConfiguration implements Converter<List<AlertTemp
         alertConfiguration.getParameters().addAll(Arrays.stream(AlertConfigurationRequiredParameter.values())
                 .map(requiredParameter ->
                         new ParameterConfiguration()
-                                .setId(requiredParameter.getSubstitutionName())
+                                .setId(String.valueOf(requiredParameter.getId()))
                                 .setName(requiredParameter.getReadableName())
                                 .setMandatory(true)
                                 .setValueRegexp(requiredParameter.getRegexp())
