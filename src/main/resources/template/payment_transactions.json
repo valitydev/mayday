@@ -39,14 +39,14 @@
     {
       "id": 5,
       "substitution_name": "transaction_num_threshold",
-      "readable_name": "Введите порог конверсии в процентах (Пример: 85)",
+      "readable_name": "Введите пороговое количество транзакций (Пример: 10000)",
       "mandatory": true,
       "regexp": "^[0-9][0-9]?$|^100$"
     },
     {
       "id": 6,
       "substitution_name": "transactions_period_minutes",
-      "readable_name": "Период в минутах, за который необходимо проверять конверсию (Пример: 60)",
+      "readable_name": "Период в минутах, за который необходимо проверять количество транзакций (Пример: 60)",
       "mandatory": true,
       "regexp": "^\\d+$"
     }
