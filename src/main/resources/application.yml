@@ -1,0 +1,54 @@
+server:
+  port: '8022'
+
+management:
+  server:
+    port: '${management.port}'
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+spring:
+  application:
+    name: 'mayday'
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/daway
+    username: postgres
+    password: postgres
+
+mayday:
+  webhook-url: http://localhost:8022
+  alertmanager-webhook-path: /alertmanager/webhook
+
+k8s:
+  namespace: default
+  prometheus-rule:
+    labels:
+      prometheus: prometheus
+  alertmanager-configuration:
+    labels:
+      alertmanager: alertmanager
+telegram-bot:
+  url: http://telegram:1234/endp
+
+
+testcontainers:
+  postgresql:
+    tag: '13'
