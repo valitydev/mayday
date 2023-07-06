@@ -41,7 +41,7 @@
       "substitution_name": "transaction_num_threshold",
       "readable_name": "Введите пороговое количество транзакций (Пример: 10000)",
       "mandatory": true,
-      "regexp": "^[0-9][0-9]?$|^100$"
+      "regexp": "^\\d+$"
     },
     {
       "id": 6,
