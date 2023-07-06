@@ -1,7 +1,7 @@
 {
   "id": "payout_limit_custom_hours",
   "readable_name": "Оборот (выплаты) в определенные часы",
-  "prometheus_query": "(sum(sum_over_time(ebm_withdrawals_amount{provider_id=~\"${provider_id}\",wallet_id=~\"${wallet_id}\",status=\"succeeded\",terminal_id=~\"${terminal_id}\",currency=~\"${currency}\"}[${sum_period_hours}h])) OR on() vector(0)) ${boundary_type} ${amount_threshold} ${time_interval_boundary} hour() >= ${time_interval_start_hour}+3 < ${time_interval_end_hour}+3",
+  "prometheus_query": "(sum(sum_over_time(ebm_withdrawals_amount{provider_id=~\"${provider_id}\",wallet_id=~\"${wallet_id}\",status=\"succeeded\",terminal_id=~\"${terminal_id}\",currency=~\"${currency}\"}[${sum_period_hours}h])) OR on() vector(0)) ${boundary_type} ${amount_threshold} ${time_interval_boundary} hour() >= ${time_interval_start_hour}-3 < ${time_interval_end_hour}-3",
   "alert_name_template": "Оборот выплат по провайдеру '${provider_id}', терминалу '${terminal_id}' и кошельку '${wallet_id}' с валютой '${currency}' за последние ${sum_period_hours} часов ${boundary_type} ${amount_threshold}. Временной интервал с ${time_interval_start_hour} UTC по ${time_interval_end_hour} UTC",
   "alert_notification_template": "Оборот выплат по провайдеру '${provider_id}', терминалу '${terminal_id}' и кошельку '${wallet_id}' с валютой '${currency}' в интервале с ${time_interval_start_hour} UTC по ${time_interval_end_hour} UTC за последние ${sum_period_hours} часов ${boundary_type} ${amount_threshold}! Текущее значение: {{ $value }}",
   "parameters": [
