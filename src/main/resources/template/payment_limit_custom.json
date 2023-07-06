@@ -1,9 +1,9 @@
 {
   "id": "payment_limit_custom_hours",
   "readable_name": "Оборот (эквайринг) в определенные часы",
-  "prometheus_query": "sum(sum_over_time(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\"}[${sum_period_hours}h])) OR on() vector(0) ${boundary_type} ${amount_threshold} ${time_interval_boundary} hour() >= ${time_interval_start_hour} < ${time_interval_end_hour}",
-  "alert_name_template": "Оборот платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' за последние ${sum_period_hours} часов ${boundary_type} ${amount_threshold}. Временной интервал с ${time_interval_start_hour} по ${time_interval_end_hour}",
-  "alert_notification_template": "Оборот платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' в интервале с ${time_interval_start_hour} по ${time_interval_end_hour} за последние ${sum_period_hours} часов ${boundary_type} ${amount_threshold}! Текущее значение: {{ $value }}",
+  "prometheus_query": "(sum(sum_over_time(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\"}[${sum_period_hours}h])) OR on() vector(0)) ${boundary_type} ${amount_threshold} ${time_interval_boundary} hour() >= ${time_interval_start_hour}+3 < ${time_interval_end_hour}+3",
+  "alert_name_template": "Оборот платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' за последние ${sum_period_hours} часов ${boundary_type} ${amount_threshold}. Временной интервал с ${time_interval_start_hour} UTC по ${time_interval_end_hour} UTC",
+  "alert_notification_template": "Оборот платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' в интервале с ${time_interval_start_hour} UTC по ${time_interval_end_hour} UTC за последние ${sum_period_hours} часов ${boundary_type} ${amount_threshold}! Текущее значение: {{ $value }}",
   "parameters": [
     {
       "id": 1,
@@ -53,14 +53,14 @@
     {
       "id": 7,
       "substitution_name": "time_interval_start_hour",
-      "readable_name": "Введите начало временного интервала в часовом поясе UTC (часы в формате 0-23), когда необходимо проверять сумму. Если вы хотите проверять сумму платежей на протяжении всего дня, введите 0.",
+      "readable_name": "Введите начало временного интервала в часовом поясе MSK (UTC+3) (часы в формате 0-23), когда необходимо проверять сумму. Если вы хотите проверять сумму платежей на протяжении всего дня, введите 0.",
       "mandatory": true,
       "regexp": "^2[0-3]|1[0-9]|[0-9]"
     },
     {
       "id": 8,
       "substitution_name": "time_interval_end_hour",
-      "readable_name": "Введите конец временного интервала в часовом поясе UTC (часы в формате 0-23), когда необходимо проверять сумму. Если вы хотите проверять сумму платежей на протяжении всего дня, введите 0.",
+      "readable_name": "Введите конец временного интервала в часовом поясе MSK (UTC+3) (часы в формате 0-23), когда необходимо проверять сумму. Если вы хотите проверять сумму платежей на протяжении всего дня, введите 0.",
       "mandatory": true,
       "regexp": "^2[0-3]|1[0-9]|[0-9]"
     },

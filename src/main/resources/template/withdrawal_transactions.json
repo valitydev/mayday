@@ -1,7 +1,7 @@
 {
   "id": "withdrawal_transactions",
   "readable_name": "Количество выплатных транзакций",
-  "prometheus_query": "sum(sum_over_time(ebm_withdrawals_final_status_count{terminal_id=~\"${terminal_id}\",provider_id=~\"${provider_id}\",wallet_id=~\"${wallet_id}\"}[${transactions_period_minutes}m])) OR on() vector(0) ${boundary_type} ${transaction_num_threshold}",
+  "prometheus_query": "(sum(sum_over_time(ebm_withdrawals_final_status_count{terminal_id=~\"${terminal_id}\",provider_id=~\"${provider_id}\",wallet_id=~\"${wallet_id}\"}[${transactions_period_minutes}m])) OR on() vector(0)) ${boundary_type} ${transaction_num_threshold}",
   "alert_name_template": "Количество выплатных транзакций у провайдера ${provider_id}, терминала ${terminal_id} и кошелька ${wallet_id} за последние ${transactions_period_minutes} минут ${boundary_type} ${transaction_num_threshold}",
   "alert_notification_template": "Количество выплатных транзакций у провайдера ${provider_id}, терминала ${terminal_id} и кошелька ${wallet_id} за последние ${transactions_period_minutes} минут ${boundary_type} ${transaction_num_threshold}! Текущее значение: {{ $value }}",
   "parameters": [
