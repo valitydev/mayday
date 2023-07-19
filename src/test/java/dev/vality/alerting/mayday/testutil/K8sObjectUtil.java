@@ -1,7 +1,7 @@
 package dev.vality.alerting.mayday.testutil;
 
-import dev.vality.alerting.mayday.client.model.prometheus.PrometheusRuleSpec;
-import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
+import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRuleSpec;
+import dev.vality.alerting.mayday.common.constant.PrometheusRuleAnnotation;
 import lombok.experimental.UtilityClass;
 
 import java.util.Map;

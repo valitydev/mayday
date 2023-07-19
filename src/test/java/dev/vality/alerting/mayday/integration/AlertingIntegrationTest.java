@@ -4,16 +4,15 @@ import dev.vality.alerting.mayday.Alert;
 import dev.vality.alerting.mayday.AlertConfiguration;
 import dev.vality.alerting.mayday.AlertingServiceSrv;
 import dev.vality.alerting.mayday.UserAlert;
-import dev.vality.alerting.mayday.client.K8sAlertmanagerClient;
-import dev.vality.alerting.mayday.client.K8sPrometheusClient;
-import dev.vality.alerting.mayday.client.model.alertmanager.AlertmanagerConfig;
-import dev.vality.alerting.mayday.client.model.prometheus.PrometheusRule;
+import dev.vality.alerting.mayday.alertmanager.client.k8s.AlertmanagerClient;
+import dev.vality.alerting.mayday.prometheus.client.k8s.PrometheusClient;
+import dev.vality.alerting.mayday.alertmanager.client.k8s.model.AlertmanagerConfig;
+import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRule;
 import dev.vality.alerting.mayday.constant.K8sParameter;
-import dev.vality.alerting.mayday.constant.PrometheusRuleAnnotation;
+import dev.vality.alerting.mayday.common.constant.PrometheusRuleAnnotation;
 import dev.vality.alerting.mayday.testutil.K8sObjectUtil;
 import dev.vality.alerting.mayday.testutil.ThriftObjectUtil;
 import dev.vality.testcontainers.annotations.DefaultSpringBootTest;
-import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainerSingleton;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,9 +37,9 @@ public class AlertingIntegrationTest {
     private AlertingServiceSrv.Iface thriftEndpoint;
 
     @MockBean
-    private K8sPrometheusClient prometheusClient;
+    private PrometheusClient prometheusClient;
     @MockBean
-    private K8sAlertmanagerClient alertmanagerClient;
+    private AlertmanagerClient alertmanagerClient;
 
     private AutoCloseable mocks;
 
