@@ -5,11 +5,12 @@ import dev.vality.alerting.mayday.AlertConfiguration;
 import dev.vality.alerting.mayday.AlertingServiceSrv;
 import dev.vality.alerting.mayday.UserAlert;
 import dev.vality.alerting.mayday.alertmanager.client.k8s.AlertmanagerClient;
+import dev.vality.alerting.mayday.alertmanager.service.AlertmanagerService;
 import dev.vality.alerting.mayday.prometheus.client.k8s.PrometheusClient;
 import dev.vality.alerting.mayday.alertmanager.client.k8s.model.AlertmanagerConfig;
 import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRule;
-import dev.vality.alerting.mayday.constant.K8sParameter;
 import dev.vality.alerting.mayday.common.constant.PrometheusRuleAnnotation;
+import dev.vality.alerting.mayday.prometheus.service.PrometheusService;
 import dev.vality.alerting.mayday.testutil.K8sObjectUtil;
 import dev.vality.alerting.mayday.testutil.ThriftObjectUtil;
 import dev.vality.testcontainers.annotations.DefaultSpringBootTest;
@@ -35,6 +36,10 @@ public class AlertingIntegrationTest {
 
     @Autowired
     private AlertingServiceSrv.Iface thriftEndpoint;
+    @Autowired
+    private PrometheusService prometheusService;
+    @Autowired
+    private AlertmanagerService alertmanagerService;
 
     @MockBean
     private PrometheusClient prometheusClient;
@@ -71,28 +76,27 @@ public class AlertingIntegrationTest {
     @Test
     void getUserAlertsEmpty() throws TException {
         String userName = UUID.randomUUID().toString();
-        when(prometheusClient.getPrometheusRule(K8sParameter.PROMETHEUS_RULE_NAME))
+        when(prometheusClient.getPrometheusRule(prometheusService.getPrometheusRuleName()))
                 .thenReturn(Optional.of(new PrometheusRule()));
-        when(prometheusClient.getPrometheusRuleGroupAlerts(K8sParameter.PROMETHEUS_RULE_NAME, userName))
+        when(prometheusClient.getPrometheusRuleGroupAlerts(prometheusService.getPrometheusRuleName(), userName))
                 .thenReturn(Set.of());
         List<UserAlert> userAlerts = thriftEndpoint.getUserAlerts(userName);
         assertNotNull(userAlerts);
         assertTrue(userAlerts.isEmpty());
         verify(prometheusClient, times(1))
-                .getPrometheusRule(K8sParameter.PROMETHEUS_RULE_NAME);
+                .getPrometheusRule(prometheusService.getPrometheusRuleName());
         verify(prometheusClient, times(1))
-                .getPrometheusRuleGroupAlerts(K8sParameter.PROMETHEUS_RULE_NAME, userName);
+                .getPrometheusRuleGroupAlerts(prometheusService.getPrometheusRuleName(), userName);
     }
 
     @Test
     void getUserAlerts() throws TException {
         String userName = UUID.randomUUID().toString();
         var testRule = K8sObjectUtil.testPrometheusRule();
-        when(prometheusClient.getPrometheusRule(K8sParameter.PROMETHEUS_RULE_NAME))
+        when(prometheusClient.getPrometheusRule(prometheusService.getPrometheusRuleName()))
                 .thenReturn(Optional.of(new PrometheusRule()));
-        when(prometheusClient.getPrometheusRuleGroupAlerts(K8sParameter.PROMETHEUS_RULE_NAME, userName)).thenReturn(
-                Set.of(testRule)
-        );
+        when(prometheusClient.getPrometheusRuleGroupAlerts(prometheusService.getPrometheusRuleName(), userName))
+                .thenReturn(Set.of(testRule));
         List<UserAlert> userAlerts = thriftEndpoint.getUserAlerts(userName);
         assertNotNull(userAlerts);
         assertEquals(1, userAlerts.size());
@@ -101,28 +105,28 @@ public class AlertingIntegrationTest {
         assertEquals(testRule.getAlert(), userAlert.getId());
         assertEquals(testRule.getAnnotations().get(PrometheusRuleAnnotation.ALERT_NAME), userAlert.getName());
         verify(prometheusClient, times(1))
-                .getPrometheusRule(K8sParameter.PROMETHEUS_RULE_NAME);
+                .getPrometheusRule(prometheusService.getPrometheusRuleName());
         verify(prometheusClient, times(1))
-                .getPrometheusRuleGroupAlerts(K8sParameter.PROMETHEUS_RULE_NAME, userName);
+                .getPrometheusRuleGroupAlerts(prometheusService.getPrometheusRuleName(), userName);
     }
 
     @Test
     @Disabled
     void createAlert() throws TException {
         var createAlertRequest = ThriftObjectUtil.testCreateAlertRequest(getAlertConfiguration());
-        when(prometheusClient.getPrometheusRule(K8sParameter.PROMETHEUS_RULE_NAME))
+        when(prometheusClient.getPrometheusRule(prometheusService.getPrometheusRuleName()))
                 .thenReturn(Optional.of(new PrometheusRule()));
-        when(alertmanagerClient.getAlertmanagerConfig(K8sParameter.ALERTMANAGER_CONFIG_NAME))
+        when(alertmanagerClient.getAlertmanagerConfig(alertmanagerService.getAlertmanagerConfigName()))
                 .thenReturn(Optional.of(new AlertmanagerConfig()));
         thriftEndpoint.createAlert(createAlertRequest);
-        verify(prometheusClient, times(1)).getPrometheusRule(K8sParameter.PROMETHEUS_RULE_NAME);
+        verify(prometheusClient, times(1)).getPrometheusRule(prometheusService.getPrometheusRuleName());
         verify(prometheusClient, times(1))
-                .addAlertToPrometheusRuleGroup(eq(K8sParameter.PROMETHEUS_RULE_NAME),
+                .addAlertToPrometheusRuleGroup(eq(prometheusService.getPrometheusRuleName()),
                 eq(createAlertRequest.getUserId()), any());
         verify(alertmanagerClient, times(1))
-                .getAlertmanagerConfig(eq(K8sParameter.ALERTMANAGER_CONFIG_NAME));
+                .getAlertmanagerConfig(eq(alertmanagerService.getAlertmanagerConfigName()));
         verify(alertmanagerClient, times(1))
-                .addRouteIfNotExists(eq(K8sParameter.ALERTMANAGER_CONFIG_NAME), any());
+                .addRouteIfNotExists(eq(alertmanagerService.getAlertmanagerConfigName()), any());
     }
 
     private List<Alert> getSupportedAlerts() throws TException {

@@ -4,16 +4,20 @@ import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRuleSpec
 import dev.vality.alerting.mayday.common.constant.PrometheusRuleAnnotation;
 import dev.vality.alerting.mayday.common.constant.PrometheusRuleLabel;
 import dev.vality.alerting.mayday.common.dto.CreateAlertDto;
+import dev.vality.alerting.mayday.prometheus.config.properties.K8sPrometheusRuleProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class CreateAlertDtoToPrometheusRuleConverter implements Converter<CreateAlertDto, PrometheusRuleSpec.Rule> {
+
+    private final K8sPrometheusRuleProperties k8sPrometheusRuleProperties;
 
     @Value("${spring.application.name}")
     private String applicationName;
@@ -26,11 +30,10 @@ public class CreateAlertDtoToPrometheusRuleConverter implements Converter<Create
         rule.setDuration(source.getFormattedDurationMinutes());
         rule.setAnnotations(Map.of(PrometheusRuleAnnotation.ALERT_NAME, source.getUserFriendlyAlertName(),
                 PrometheusRuleAnnotation.ALERT_DESCRIPTION, source.getUserFriendlyAlertDescription()));
-        // Лейбл с неймспейсом необходим, поскольку алертменеджер по умолчанию начинает фильтровать по нему.
-        // Тут описано более подробно: https://github.com/prometheus-operator/prometheus-operator/discussions/3733
-        rule.setLabels(Map.of(PrometheusRuleLabel.NAMESPACE, "default",
-                PrometheusRuleLabel.USERNAME, source.getUserId(),
-                PrometheusRuleLabel.SERVICE, applicationName));
+        Map<String, String> labels = new HashMap<>(k8sPrometheusRuleProperties.getLabels());
+        labels.put(PrometheusRuleLabel.USERNAME, source.getUserId());
+        labels.put(PrometheusRuleLabel.SERVICE, applicationName);
+        rule.setLabels(labels);
         return rule;
     }
 }

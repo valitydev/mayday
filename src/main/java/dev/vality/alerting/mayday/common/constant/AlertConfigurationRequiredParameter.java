@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Every alert configuration includes all of these parameters
+ * Обязательные параметры для создания каждого алерта
  */
 @Getter
 @RequiredArgsConstructor

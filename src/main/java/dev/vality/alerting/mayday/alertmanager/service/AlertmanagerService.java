@@ -11,6 +11,7 @@ import dev.vality.alerting.mayday.common.constant.AlertConfigurationRequiredPara
 import dev.vality.alerting.mayday.common.constant.PrometheusRuleLabel;
 import dev.vality.alerting.mayday.common.dto.CreateAlertDto;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,15 +32,16 @@ public class AlertmanagerService {
     private final AlertmanagerClient alertmanagerClient;
     @Value("${spring.application.name}")
     private String applicationName;
-    private final String ALERTMANAGER_CONFIG_NAME = "%s-managed-config".formatted(applicationName);
+    @Getter
+    private final String alertmanagerConfigName = "%s-managed-config".formatted(applicationName);
 
     public void createUserRoute(CreateAlertDto createAlertDto) {
-        if (alertmanagerClient.getAlertmanagerConfig(ALERTMANAGER_CONFIG_NAME).isEmpty()) {
-            log.info("Alertmanager config '{}' not found and will be created", ALERTMANAGER_CONFIG_NAME);
+        if (alertmanagerClient.getAlertmanagerConfig(alertmanagerConfigName).isEmpty()) {
+            log.info("Alertmanager config '{}' not found and will be created", alertmanagerConfigName);
             alertmanagerClient.createAlertmanagerConfig(buildAlertmanagerConfig());
-            log.info("Alertmanager config '{}' was created successfully", ALERTMANAGER_CONFIG_NAME);
+            log.info("Alertmanager config '{}' was created successfully", alertmanagerConfigName);
         }
-        alertmanagerClient.addRouteIfNotExists(ALERTMANAGER_CONFIG_NAME, buildRoute(createAlertDto));
+        alertmanagerClient.addRouteIfNotExists(alertmanagerConfigName, buildRoute(createAlertDto));
     }
 
     private AlertmanagerConfig buildAlertmanagerConfig() {
@@ -76,7 +78,8 @@ public class AlertmanagerService {
         return webhookConfig;
     }
 
-    private AlertmanagerConfigSpec.Receiver buildAlertManagerConfigReceiver(AlertmanagerConfigSpec.WebhookConfig webhookConfig) {
+    private AlertmanagerConfigSpec.Receiver buildAlertManagerConfigReceiver(
+            AlertmanagerConfigSpec.WebhookConfig webhookConfig) {
         AlertmanagerConfigSpec.Receiver receiver = new AlertmanagerConfigSpec.Receiver();
         receiver.setName(applicationName);
         receiver.setWebhookConfigs(Set.of(webhookConfig));
@@ -102,23 +105,23 @@ public class AlertmanagerService {
     private ObjectMeta buildAlertmanagerConfigMetadata() {
         var metadata = new ObjectMeta();
         metadata.setLabels(k8sAlertmanagerProperties.getLabels());
-        metadata.setName(ALERTMANAGER_CONFIG_NAME);
+        metadata.setName(alertmanagerConfigName);
         return metadata;
     }
 
     public void deleteUserRoute(String alertId) {
-        if (alertmanagerClient.getAlertmanagerConfig(ALERTMANAGER_CONFIG_NAME).isEmpty()) {
-            log.warn("Alertmanager config '{}' not found, no need to delete user route", ALERTMANAGER_CONFIG_NAME);
+        if (alertmanagerClient.getAlertmanagerConfig(alertmanagerConfigName).isEmpty()) {
+            log.warn("Alertmanager config '{}' not found, no need to delete user route", alertmanagerConfigName);
             return;
         }
-        alertmanagerClient.deleteRoute(ALERTMANAGER_CONFIG_NAME, alertId);
+        alertmanagerClient.deleteRoute(alertmanagerConfigName, alertId);
     }
 
     public void deleteUserRoutes(String userId) {
-        if (alertmanagerClient.getAlertmanagerConfig(ALERTMANAGER_CONFIG_NAME).isEmpty()) {
-            log.warn("Alertmanager config '{}' not found, no need to delete user route", ALERTMANAGER_CONFIG_NAME);
+        if (alertmanagerClient.getAlertmanagerConfig(alertmanagerConfigName).isEmpty()) {
+            log.warn("Alertmanager config '{}' not found, no need to delete user route", alertmanagerConfigName);
             return;
         }
-        alertmanagerClient.deleteRoutes(ALERTMANAGER_CONFIG_NAME, userId);
+        alertmanagerClient.deleteRoutes(alertmanagerConfigName, userId);
     }
 }

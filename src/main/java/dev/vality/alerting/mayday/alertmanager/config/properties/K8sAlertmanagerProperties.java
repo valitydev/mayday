@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Map;
 
 @Configuration
-@ConfigurationProperties(prefix = "k8s.alertmanager")
+@ConfigurationProperties(prefix = "k8s.alertmanager-configuration")
 @Getter
 @Setter
 public class K8sAlertmanagerProperties {
