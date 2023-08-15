@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>dev.vality</groupId>
 		<artifactId>service-parent-pom</artifactId>
-		<version>2.1.4</version>
+		<version>2.1.5</version>
 	</parent>
 
 	<artifactId>mayday</artifactId>
@@ -23,16 +23,6 @@
 		<server.port>8022</server.port>
 		<management.port>8023</management.port>
 		<exposed.ports>${management.port} ${server.port}</exposed.ports>
-
-		<db.user>postgres</db.user>
-		<db.password>postgres</db.password>
-		<db.schema>md</db.schema>
-		<db.port>5432</db.port>
-		<db.name>mayday</db.name>
-		<db.url>jdbc:postgresql://localhost:${db.port}/${db.name}</db.url>
-
-		<schedlock.version>4.36.0</schedlock.version>
-		<spring-cloud.version>2022.0.2</spring-cloud.version>
 	</properties>
 
 	<dependencyManagement>
@@ -40,7 +30,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
+				<version>2022.0.3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -126,15 +116,6 @@
 			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 
-
-
-
-		<!-- JOOQ Generator -->
-		<dependency>
-			<groupId>org.jooq</groupId>
-			<artifactId>jooq</artifactId>
-		</dependency>
-
 		<!-- test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -178,41 +159,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>dev.vality.maven.plugins</groupId>
-				<artifactId>pg-embedded-plugin</artifactId>
-				<version>1.0.1</version>
-				<dependencies>
-				    <dependency>
-				    	<groupId>io.zonky.test</groupId>
-				    	<artifactId>embedded-postgres</artifactId>
-				    	<version>2.0.3</version>
-				    </dependency>
-				</dependencies>
-				<configuration>
-					<port>${db.port}</port>
-					<dbName>${db.name}</dbName>
-					<schemas>
-						<schema>${db.schema}</schema>
-					</schemas>
-				</configuration>
-				<executions>
-					<execution>
-						<id>PG_server_start</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>start</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>PG_server_stop</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

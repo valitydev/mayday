@@ -38,15 +38,24 @@ mayday:
   alertmanager-webhook-path: /alertmanager/webhook
 
 k8s:
-  namespace: default
   prometheus-rule:
     labels:
-      prometheus: prometheus
+      release: prometheus
+    alert-rule:
+      labels:
+        # Лейбл с неймспейсом необходим, поскольку алертменеджер по умолчанию начинает фильтровать по нему.
+        # Тут описано более подробно: https://github.com/prometheus-operator/prometheus-operator/discussions/3733
+        namespace: default
   alertmanager-configuration:
     labels:
       alertmanager: alertmanager
-telegram-bot:
-  url: http://telegram:1234/endp
+alertmanager:
+  webhook:
+    url: http://localhost:8022
+    path: /alertmanager/webhook
+  receiver:
+    telegram-bot:
+      url: http://telegram:1234/endp
 
 
 testcontainers:
