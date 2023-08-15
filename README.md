@@ -21,21 +21,25 @@
 Проект использует [feature-layered](https://phauer.com/2020/package-by-feature/) структуру пакетов. 
 Взаимодействие с prometheus, взаимодействие с alertmanager, формирование конфигураций алертов и протокол для взаимодействия с сервисом разнесены по разным корневым каталогам.
 Это позволяет вносить правки в конкретную "фичу" и не бояться, что они сломают соседний функционал. 
-Поскольку в сервисе есть элементы, которые переиспользуются для всех "фич" - эти классы вынесены в пакет [common](src/main/java/dev/vality/alerting/mayday/common).
+В сервисе есть функционал, которые переиспользуются для всех "фич" - он вынесен в пакет [common](src/main/java/dev/vality/alerting/mayday/common).
 
 Если вас интересует не определенный функционал сервиса, а общее понимание его устройства, то лучше начать изучение кодовой базы с класса [AlertingService](src/main/java/dev/vality/alerting/mayday/thrift/service/AlertingService.java) - он реализует [thrift-протокол](https://github.com/valitydev/mayday-proto), через который и осуществляется взаимодействие с сервисом.
 
 ##### Prometheus
 
-Prometheus содержит информацию о всех метриках, которые отдают ему экспортеры. С помощью правил алертинга (они же [alerting rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)) можно настроить prometheus таким образом, чтобы он на постоянной основе выполнял переданный в правиле алертинга запрос к метрикам. Если резальтат запроса "положителен" (`true`/ не `0`) дольше, чем период времени, который так же передается в правиле алертинга, prometheus отправляет запрос в alertmanager.
+Prometheus содержит информацию о всех метриках, которые отдают ему экспортеры. С помощью правил алертинга (они же [alerting rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)) можно настроить prometheus таким образом, чтобы он на постоянной основе выполнял переданный в правиле алертинга запрос к метрикам. Если результат запроса "положителен" (`true`/ не `0`) дольше, чем период времени, который так же передается в правиле алертинга, prometheus отправляет запрос в alertmanager.
 
-Сервис mayday отвечает за создание и удаление правил алертинга. API, через которое происходит взаимодействие с prometheus, описано в разделе [prometheus-operator](#prometheus-operator).
+Сервис mayday отвечает за создание и удаление правил алертинга. 
+
+API, через которое происходит взаимодействие с prometheus, описано в разделе [prometheus-operator](#prometheus-operator).
 
 ##### Alertmanager
 
 Alertmanager содержит информацию о том, кому, куда и с какой периодичностью отправлять алерты. Чтобы лучше понимать специфику алертменеджера, рекомендуется изучить официальную [документацию](https://prometheus.io/docs/alerting/latest/alertmanager/).
+
 В рамках системы алертинга, сервис mayday создает новый маршрут([route](https://prometheus.io/docs/alerting/latest/configuration/#route)) в конфигурации алертменеджера для каждого нового правила алертинга.
 Когда алертменеджер отправляет алерт, в качестве способа отправки используется [webhook](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config), а в качестве адресата - сервис mayday (вебхук прилетает в [контроллер](src/main/java/dev/vality/alerting/mayday/alertmanager/controller/WebhookController.java)). Mayday на основе содержимого вебхука определяет получателся алерта и "прокидывает" его дальше, предварительно преобразовав в нужный формат - в данный момент единственным получаетелем является сервис [alert-tg-bot](https://github.com/valitydev/alert-tg-bot).
+
 API, через которое происходит взаимодействие сервиса mayday с alertmanager, описано в разделе [prometheus-operator](#prometheus-operator).
 
 #### Prometheus-operator
@@ -44,7 +48,7 @@ API, через которое происходит взаимодействие
 
 В случае с prometheus, mayday создает одну группу правил ([RuleGroup](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.RuleGroup)) с именем `mayday-managed-rule`. Далее, при получении запроса на создание алерта, внутри этой группы создается отдельное [правило](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.Rule) на каждый алерт. Реализацию этой логики можно изучить в коде [клиента prometheus](src/main/java/dev/vality/alerting/mayday/prometheus/client/k8s/PrometheusClient.java).
 
-В случае с alertmanager, mayday создает одну конфигурацию алертменеджера ([AlertmanagerConfig](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1alpha1.AlertmanagerConfig)) с именем `mayday-managed-config`. Далее, при получении запроса на создание алерта, внутри этой конфигурации создается отдельный [маршрут](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1alpha1.Route) на каждый алерт. Реализацию этой логики в коде можно изучить в коде [клиента alertmanager](src/main/java/dev/vality/alerting/mayday/alertmanager/client/k8s/AlertmanagerClient.java).
+В случае с alertmanager, mayday создает одну конфигурацию алертменеджера ([AlertmanagerConfig](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1alpha1.AlertmanagerConfig)) с именем `mayday-managed-config`. Далее, при получении запроса на создание алерта, внутри этой конфигурации создается отдельный [маршрут](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1alpha1.Route) на каждый алерт. Реализацию этой логики можно изучить в коде [клиента alertmanager](src/main/java/dev/vality/alerting/mayday/alertmanager/client/k8s/AlertmanagerClient.java).
 
 #### Конфигурации алертов
 
@@ -112,13 +116,19 @@ API, через которое происходит взаимодействие
 Примеры запросов:
 
 Получить список поддерживаемых алертов:
-`woorl -s /mayday-proto/proto/mayday.thrift 'http://localhost:8022/mayday' AlertingService GetSupportedAlerts`
+```
+woorl -s /mayday-proto/proto/mayday.thrift 'http://localhost:8022/mayday' AlertingService GetSupportedAlerts
+```
 
 Получить алерты пользователя:
-`woorl -s /mayday-proto/proto/mayday.thrift 'http://localhost:8022/mayday' AlertingService GetUserAlerts '"username"'`
+```
+woorl -s /mayday-proto/proto/mayday.thrift 'http://localhost:8022/mayday' AlertingService GetUserAlerts '"username"'
+```
 
 Удалить алерт пользователя:
-`woorl -s /mayday-proto/proto/mayday.thrift 'http://localhost:8022/mayday' AlertingService DeleteAlert '"username"' '"323de93494df90733484f94f1afd2b44"'`
+```
+woorl -s /mayday-proto/proto/mayday.thrift 'http://localhost:8022/mayday' AlertingService DeleteAlert '"username"' '"323de93494df90733484f94f1afd2b44"'
+```
 
 Создать алерт:
 

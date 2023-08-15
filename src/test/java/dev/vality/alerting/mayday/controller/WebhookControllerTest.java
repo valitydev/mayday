@@ -1,6 +1,7 @@
 package dev.vality.alerting.mayday.controller;
 
 import dev.vality.alerting.mayday.MaydayApplication;
+import dev.vality.alerting.mayday.alertmanager.service.AlertmanagerService;
 import dev.vality.alerting.tg_bot.NotifierServiceSrv;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.AfterEach;
@@ -34,11 +35,13 @@ class WebhookControllerTest {
     protected int localServerPort;
     @MockBean
     private NotifierServiceSrv.Iface telegramBotClient;
+    @MockBean
+    private AlertmanagerService alertmanagerService;
     private final RestTemplate restTemplateToService = new RestTemplate();
 
     @AfterEach
     void checkMocks() {
-        verifyNoMoreInteractions(telegramBotClient);
+        verifyNoMoreInteractions(telegramBotClient, alertmanagerService);
     }
 
 
@@ -51,11 +54,13 @@ class WebhookControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
+        when(alertmanagerService.containsUserRoute(any(), any())).thenReturn(true);
         HttpEntity<String> entity = new HttpEntity<>(request, headers);
         var result = restTemplateToService.exchange(String.format("http://localhost:%s/alertmanager/webhook",
                 localServerPort), HttpMethod.POST, entity, String.class);
         assertTrue(result.getStatusCode().is2xxSuccessful());
         verify(telegramBotClient, times(1)).notify(any());
+        verify(alertmanagerService, times(1)).containsUserRoute(any(), any());
     }
 
 }

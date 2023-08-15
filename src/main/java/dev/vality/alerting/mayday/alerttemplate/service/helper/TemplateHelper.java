@@ -2,11 +2,11 @@ package dev.vality.alerting.mayday.alerttemplate.service.helper;
 
 import dev.vality.alerting.mayday.CreateAlertRequest;
 import dev.vality.alerting.mayday.ParameterInfo;
-import dev.vality.alerting.mayday.common.constant.AlertConfigurationRequiredParameter;
-import dev.vality.alerting.mayday.common.dto.CreateAlertDto;
 import dev.vality.alerting.mayday.alerttemplate.error.AlertConfigurationException;
 import dev.vality.alerting.mayday.alerttemplate.model.alerttemplate.AlertTemplate;
 import dev.vality.alerting.mayday.alerttemplate.service.DictionaryService;
+import dev.vality.alerting.mayday.common.constant.AlertConfigurationRequiredParameter;
+import dev.vality.alerting.mayday.common.dto.CreateAlertDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -42,7 +42,6 @@ public class TemplateHelper {
         log.debug("Prepared prometheus expression: {}", queryExpression);
         String alertId = generateAlertId(createAlertRequest, queryExpression);
 
-        //TODO: handle duration params
         return CreateAlertDto.builder()
                 .alertId(alertId)
                 .prometheusQuery(queryExpression)
@@ -57,9 +56,9 @@ public class TemplateHelper {
                 .build();
     }
 
-    private Map<String, List<String>> mergeParameters(List<ParameterInfo> externalParamsInfo,
-                                                      List<AlertTemplate.AlertConfigurationParameter>
-                                                              maydayParamsInfo) {
+    protected Map<String, List<String>> mergeParameters(List<ParameterInfo> externalParamsInfo,
+                                                        List<AlertTemplate.AlertConfigurationParameter>
+                                                                maydayParamsInfo) {
         Map<String, List<String>> params = maydayParamsInfo.stream()
                 .map(maydayParamInfo -> {
                             var externalParamInfos = externalParamsInfo.stream()
@@ -67,25 +66,17 @@ public class TemplateHelper {
                                             maydayParamInfo.getId().toString().equals(userParamInfo.getId()))
                                     .toList();
 
-                            if (externalParamInfos.size() > 1 && !maydayParamInfo.getMultipleValues()) {
-                                throw new AlertConfigurationException(String.format("Parameter '%s' cannot have " +
-                                        "multiple values!", maydayParamInfo.getSubstitutionName()));
-                            }
-
-                            if ((externalParamInfos.isEmpty() || externalParamInfos.size() == 1
-                                    && hasNoValue(externalParamInfos.get(0))) && maydayParamInfo.getMandatory()) {
-                                throw new AlertConfigurationException("Unable to find required" +
-                                        " parameter: " + maydayParamInfo.getSubstitutionName());
-                            }
+                            validateMultipleValues(maydayParamInfo, externalParamInfos);
+                            validateMandatoryValues(maydayParamInfo, externalParamInfos);
 
                             List<String> values = new ArrayList<>();
                             if (!maydayParamInfo.getMandatory() && externalParamInfos.size() == 1) {
                                 values.add(hasNoValue(externalParamInfos.get(0)) ? anyPrometheusValue :
-                                        getDictionaryValueIfRequired(maydayParamInfo, externalParamInfos.get(0)));
+                                        getParameterValue(maydayParamInfo, externalParamInfos.get(0)));
                             } else {
                                 externalParamInfos.stream()
                                         .filter(parameterInfo -> !hasNoValue(parameterInfo))
-                                        .map(parameterInfo -> getDictionaryValueIfRequired(maydayParamInfo,
+                                        .map(parameterInfo -> getParameterValue(maydayParamInfo,
                                                 parameterInfo))
                                         .forEach(values::add);
                             }
@@ -95,7 +86,7 @@ public class TemplateHelper {
                 ).flatMap(map -> map.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        //Required parameters
+        // Add required parameters
         Arrays.stream(AlertConfigurationRequiredParameter.values()).forEach(
                 requiredParameter -> {
                     var param = getRequiredParameter(String.valueOf(requiredParameter.getId()), externalParamsInfo);
@@ -105,7 +96,24 @@ public class TemplateHelper {
         return params;
     }
 
-    private ParameterInfo getRequiredParameter(String name, List<ParameterInfo> parameterInfos) {
+    private static void validateMultipleValues(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
+                                               List<ParameterInfo> externalParamInfos) {
+        if (externalParamInfos.size() > 1 && !maydayParamInfo.getMultipleValues()) {
+            throw new AlertConfigurationException(String.format("Parameter '%s' cannot have " +
+                    "multiple values!", maydayParamInfo.getSubstitutionName()));
+        }
+    }
+
+    private void validateMandatoryValues(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
+                                         List<ParameterInfo> externalParamInfos) {
+        if ((externalParamInfos.isEmpty() || externalParamInfos.size() == 1
+                && hasNoValue(externalParamInfos.get(0))) && maydayParamInfo.getMandatory()) {
+            throw new AlertConfigurationException("Unable to find required" +
+                    " parameter: " + maydayParamInfo.getSubstitutionName());
+        }
+    }
+
+    protected ParameterInfo getRequiredParameter(String name, List<ParameterInfo> parameterInfos) {
         return parameterInfos.stream()
                 .filter(paramInfo ->
                         paramInfo.getId().equals(name))
@@ -113,20 +121,20 @@ public class TemplateHelper {
                         " parameter: " + name));
     }
 
-    private String generateAlertId(CreateAlertRequest createAlertRequest, String preparedExpression) {
+    protected String generateAlertId(CreateAlertRequest createAlertRequest, String preparedExpression) {
         return DigestUtils.md5DigestAsHex((createAlertRequest.getUserId() + preparedExpression)
                 .getBytes(StandardCharsets.UTF_8));
     }
 
-    private String prepareMetricExpression(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
+    protected String prepareMetricExpression(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
         return prepareTemplate(metricTemplate.getPrometheusQuery(), parameters);
     }
 
-    private String prepareUserFriendlyAlertName(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
+    protected String prepareUserFriendlyAlertName(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
         return prepareUserFriendlyTemplate(metricTemplate.getAlertNameTemplate(), parameters);
     }
 
-    private String prepareMetricAlertMessage(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
+    protected String prepareMetricAlertMessage(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
         return prepareUserFriendlyTemplate(metricTemplate.getAlertNotificationTemplate(), parameters);
     }
 
@@ -160,8 +168,8 @@ public class TemplateHelper {
         return value;
     }
 
-    private String getDictionaryValueIfRequired(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
-                                                ParameterInfo userParamInfo) {
+    private String getParameterValue(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
+                                     ParameterInfo userParamInfo) {
         if (maydayParamInfo.getDictionaryName() != null) {
             return dictionaryService.getDictionary(maydayParamInfo.getDictionaryName()).get(userParamInfo.getValue());
         }

@@ -6,6 +6,7 @@ import dev.vality.alerting.mayday.common.constant.PrometheusRuleAnnotation;
 import dev.vality.alerting.mayday.common.constant.PrometheusRuleLabel;
 import lombok.experimental.UtilityClass;
 
+import java.util.Set;
 import java.util.function.UnaryOperator;
 
 @UtilityClass
@@ -86,4 +87,28 @@ public class AlertmanagerFunctionsUtil {
         return alertmanagerConfig.getSpec().getRoute().getRoutes().stream()
                 .anyMatch(childRoute -> childRoute.equals(route));
     }
+
+    public static boolean hasRoute(AlertmanagerConfig alertmanagerConfig, String userId, String alertName) {
+        if (alertmanagerConfig.getSpec().getRoute() == null
+                || alertmanagerConfig.getSpec().getRoute().getRoutes() == null) {
+            return false;
+        }
+
+        AlertmanagerConfigSpec.Matcher userIdMatcher =
+                AlertmanagerFunctionsUtil.createMatcher(PrometheusRuleLabel.USERNAME,
+                        userId);
+        AlertmanagerConfigSpec.Matcher alertNameMatcher =
+                AlertmanagerFunctionsUtil.createMatcher(PrometheusRuleLabel.ALERT_NAME,
+                        alertName);
+        Set<AlertmanagerConfigSpec.ChildRoute> routes = alertmanagerConfig.getSpec().getRoute().getRoutes();
+        for (AlertmanagerConfigSpec.ChildRoute route : routes) {
+            var matchers = route.getMatchers();
+            if (matchers.contains(alertNameMatcher) && matchers.contains(userIdMatcher)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

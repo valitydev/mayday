@@ -124,4 +124,8 @@ public class AlertmanagerService {
         }
         alertmanagerClient.deleteRoutes(alertmanagerConfigName, userId);
     }
+
+    public boolean containsUserRoute(String userId, String alertName) {
+        return alertmanagerClient.containsRoute(alertmanagerConfigName, userId, alertName);
+    }
 }

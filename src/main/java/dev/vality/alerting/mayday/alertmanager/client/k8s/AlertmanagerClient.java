@@ -1,8 +1,8 @@
 package dev.vality.alerting.mayday.alertmanager.client.k8s;
 
-import dev.vality.alerting.mayday.alertmanager.client.k8s.util.AlertmanagerFunctionsUtil;
 import dev.vality.alerting.mayday.alertmanager.client.k8s.model.AlertmanagerConfig;
 import dev.vality.alerting.mayday.alertmanager.client.k8s.model.AlertmanagerConfigSpec;
+import dev.vality.alerting.mayday.alertmanager.client.k8s.util.AlertmanagerFunctionsUtil;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -76,6 +76,18 @@ public class AlertmanagerClient {
 
     public void deleteRoutes(String configName, String userId) {
         modifyAlertmanagerConfig(configName, AlertmanagerFunctionsUtil.getRemoveUserRoutesFunc(userId));
+    }
+
+    public boolean containsRoute(String configName,
+                                 String userId,
+                                 String alertname) {
+        Optional<AlertmanagerConfig> configOptional = getAlertmanagerConfig(configName);
+        if (configOptional.isEmpty()) {
+            return false;
+        }
+
+        AlertmanagerConfig alertmanagerConfig = configOptional.get();
+        return AlertmanagerFunctionsUtil.hasRoute(alertmanagerConfig, userId, alertname);
     }
 
 
