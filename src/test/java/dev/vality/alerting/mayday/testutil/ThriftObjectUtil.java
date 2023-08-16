@@ -5,23 +5,60 @@ import dev.vality.alerting.mayday.CreateAlertRequest;
 import dev.vality.alerting.mayday.ParameterInfo;
 import lombok.experimental.UtilityClass;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @UtilityClass
 public class ThriftObjectUtil {
 
-    public static CreateAlertRequest testCreateAlertRequest(AlertConfiguration alertConfiguration) {
+    public static CreateAlertRequest testCreatePaymentConversionAlertRequest(AlertConfiguration alertConfiguration) {
         var request = new CreateAlertRequest();
         request.setAlertId(alertConfiguration.getId());
         request.setUserId(UUID.randomUUID().toString());
-        request.setParameters(
-                alertConfiguration.getParameters().stream().map(parameterConfiguration -> {
-                    var paramInfo = new ParameterInfo();
-                    paramInfo.setId(parameterConfiguration.getId());
-                    paramInfo.setValue(UUID.randomUUID().toString());
-                    return paramInfo;
-                }).collect(Collectors.toList()));
+        List<ParameterInfo> parameters = new ArrayList<>();
+
+        var providerParameter = new ParameterInfo();
+        providerParameter.setId("1");
+        providerParameter.setValue("(1) test");
+        parameters.add(providerParameter);
+
+        var terminalParameter = new ParameterInfo();
+        terminalParameter.setId("2");
+        terminalParameter.setValue("(1) test");
+        parameters.add(terminalParameter);
+
+        var shopParameter = new ParameterInfo();
+        shopParameter.setId("3");
+        shopParameter.setValue("(test) test");
+        parameters.add(shopParameter);
+
+        var boundaryParameter = new ParameterInfo();
+        boundaryParameter.setId("4");
+        boundaryParameter.setValue("Больше порогового значения");
+        parameters.add(boundaryParameter);
+
+        var thresholdParameter = new ParameterInfo();
+        thresholdParameter.setId("5");
+        thresholdParameter.setValue("10");
+        parameters.add(thresholdParameter);
+
+        var periodParameter = new ParameterInfo();
+        periodParameter.setId("6");
+        periodParameter.setValue("10");
+        parameters.add(periodParameter);
+
+        var ruleCheckDurationParameter = new ParameterInfo();
+        ruleCheckDurationParameter.setId(String.valueOf(Integer.MAX_VALUE));
+        ruleCheckDurationParameter.setValue("10");
+        parameters.add(ruleCheckDurationParameter);
+
+        var alertRepeatParameter = new ParameterInfo();
+        alertRepeatParameter.setId(String.valueOf(Integer.MAX_VALUE - 1));
+        alertRepeatParameter.setValue("10");
+        parameters.add(alertRepeatParameter);
+
+        request.setParameters(parameters);
         return request;
     }
 }

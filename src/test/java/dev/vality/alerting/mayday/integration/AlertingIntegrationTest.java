@@ -5,19 +5,20 @@ import dev.vality.alerting.mayday.AlertConfiguration;
 import dev.vality.alerting.mayday.AlertingServiceSrv;
 import dev.vality.alerting.mayday.UserAlert;
 import dev.vality.alerting.mayday.alertmanager.client.k8s.AlertmanagerClient;
-import dev.vality.alerting.mayday.alertmanager.service.AlertmanagerService;
-import dev.vality.alerting.mayday.prometheus.client.k8s.PrometheusClient;
 import dev.vality.alerting.mayday.alertmanager.client.k8s.model.AlertmanagerConfig;
-import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRule;
+import dev.vality.alerting.mayday.alertmanager.service.AlertmanagerService;
+import dev.vality.alerting.mayday.alerttemplate.dao.DawayDao;
 import dev.vality.alerting.mayday.common.constant.PrometheusRuleAnnotation;
+import dev.vality.alerting.mayday.prometheus.client.k8s.PrometheusClient;
+import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRule;
 import dev.vality.alerting.mayday.prometheus.service.PrometheusService;
+import dev.vality.alerting.mayday.testutil.DawayObjectUtil;
 import dev.vality.alerting.mayday.testutil.K8sObjectUtil;
 import dev.vality.alerting.mayday.testutil.ThriftObjectUtil;
 import dev.vality.testcontainers.annotations.DefaultSpringBootTest;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,8 @@ public class AlertingIntegrationTest {
     private PrometheusClient prometheusClient;
     @MockBean
     private AlertmanagerClient alertmanagerClient;
+    @MockBean
+    private DawayDao dawayDao;
 
     private AutoCloseable mocks;
 
@@ -53,7 +56,7 @@ public class AlertingIntegrationTest {
     @BeforeEach
     public void init() {
         mocks = MockitoAnnotations.openMocks(this);
-        preparedMocks = new Object[]{prometheusClient, alertmanagerClient};
+        preparedMocks = new Object[]{prometheusClient, alertmanagerClient, dawayDao};
     }
 
     @AfterEach
@@ -62,15 +65,31 @@ public class AlertingIntegrationTest {
         mocks.close();
     }
 
+    @Test
+    void createAlert() throws TException {
+        when(prometheusClient.getPrometheusRule(prometheusService.getPrometheusRuleName()))
+                .thenReturn(Optional.of(new PrometheusRule()));
+        when(alertmanagerClient.getAlertmanagerConfig(alertmanagerService.getAlertmanagerConfigName()))
+                .thenReturn(Optional.of(new AlertmanagerConfig()));
+        when(dawayDao.getProviders()).thenReturn(DawayObjectUtil.getTestProviders());
+        when(dawayDao.getTerminals()).thenReturn(DawayObjectUtil.getTestTerminals());
+        when(dawayDao.getShops()).thenReturn(DawayObjectUtil.getTestShops());
 
-    AlertConfiguration getAlertConfiguration() throws TException {
-        List<Alert> alertList = getSupportedAlerts();
-        AlertConfiguration alertConfiguration = thriftEndpoint.getAlertConfiguration(alertList.get(0).getId());
-        assertNotNull(alertConfiguration);
-        assertNotNull(alertConfiguration.getId());
-        assertNotNull(alertConfiguration.getParameters());
-        assertFalse(alertConfiguration.getParameters().isEmpty());
-        return alertConfiguration;
+        var createAlertRequest =
+                ThriftObjectUtil.testCreatePaymentConversionAlertRequest(getPaymentConversionAlertConfiguration());
+        thriftEndpoint.createAlert(createAlertRequest);
+        verify(prometheusClient, times(1)).getPrometheusRule(prometheusService.getPrometheusRuleName());
+        verify(prometheusClient, times(1))
+                .addAlertToPrometheusRuleGroup(eq(prometheusService.getPrometheusRuleName()),
+                eq(createAlertRequest.getUserId()), any());
+        verify(alertmanagerClient, times(1))
+                .getAlertmanagerConfig(eq(alertmanagerService.getAlertmanagerConfigName()));
+        verify(alertmanagerClient, times(1))
+                .addRouteIfNotExists(eq(alertmanagerService.getAlertmanagerConfigName()), any());
+
+        verify(dawayDao, times(2)).getProviders();
+        verify(dawayDao, times(2)).getTerminals();
+        verify(dawayDao, times(2)).getShops();
     }
 
     @Test
@@ -110,23 +129,18 @@ public class AlertingIntegrationTest {
                 .getPrometheusRuleGroupAlerts(prometheusService.getPrometheusRuleName(), userName);
     }
 
-    @Test
-    @Disabled
-    void createAlert() throws TException {
-        var createAlertRequest = ThriftObjectUtil.testCreateAlertRequest(getAlertConfiguration());
-        when(prometheusClient.getPrometheusRule(prometheusService.getPrometheusRuleName()))
-                .thenReturn(Optional.of(new PrometheusRule()));
-        when(alertmanagerClient.getAlertmanagerConfig(alertmanagerService.getAlertmanagerConfigName()))
-                .thenReturn(Optional.of(new AlertmanagerConfig()));
-        thriftEndpoint.createAlert(createAlertRequest);
-        verify(prometheusClient, times(1)).getPrometheusRule(prometheusService.getPrometheusRuleName());
-        verify(prometheusClient, times(1))
-                .addAlertToPrometheusRuleGroup(eq(prometheusService.getPrometheusRuleName()),
-                eq(createAlertRequest.getUserId()), any());
-        verify(alertmanagerClient, times(1))
-                .getAlertmanagerConfig(eq(alertmanagerService.getAlertmanagerConfigName()));
-        verify(alertmanagerClient, times(1))
-                .addRouteIfNotExists(eq(alertmanagerService.getAlertmanagerConfigName()), any());
+    AlertConfiguration getPaymentConversionAlertConfiguration() throws TException {
+        List<Alert> alertList = getSupportedAlerts();
+        AlertConfiguration alertConfiguration =
+                thriftEndpoint.getAlertConfiguration(alertList.stream()
+                        .filter(alert -> alert.getId().equals("payment_conversion"))
+                        .findFirst()
+                        .orElseThrow().getId());
+        assertNotNull(alertConfiguration);
+        assertNotNull(alertConfiguration.getId());
+        assertNotNull(alertConfiguration.getParameters());
+        assertFalse(alertConfiguration.getParameters().isEmpty());
+        return alertConfiguration;
     }
 
     private List<Alert> getSupportedAlerts() throws TException {
