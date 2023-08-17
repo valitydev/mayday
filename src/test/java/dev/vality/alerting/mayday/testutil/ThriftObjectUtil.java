@@ -30,7 +30,7 @@ public class ThriftObjectUtil {
 
         var shopParameter = new ParameterInfo();
         shopParameter.setId("3");
-        shopParameter.setValue("(test) test");
+        shopParameter.setValue("(def91399...) test");
         parameters.add(shopParameter);
 
         var boundaryParameter = new ParameterInfo();

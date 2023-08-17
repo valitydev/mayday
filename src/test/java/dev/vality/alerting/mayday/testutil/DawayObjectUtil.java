@@ -29,7 +29,7 @@ public class DawayObjectUtil {
     public static List<Shop> getTestShops() {
         return List.of(
                 Shop.builder()
-                        .id("test")
+                        .id("def91399-75ff-4307-8634-626c85859ea4")
                         .name("test").build()
         );
     }

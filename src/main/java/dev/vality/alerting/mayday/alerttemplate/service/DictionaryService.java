@@ -4,12 +4,15 @@ import dev.vality.alerting.mayday.alerttemplate.model.alerttemplate.DictionaryTy
 import dev.vality.alerting.mayday.alerttemplate.dao.DawayDao;
 import dev.vality.alerting.mayday.alerttemplate.model.daway.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DictionaryService {
@@ -52,8 +55,19 @@ public class DictionaryService {
     private Map<String, String> convertShopsToDictionary(List<Shop> shops) {
         return shops.stream()
                 .collect(Collectors.toMap(
-                        shop -> formatDictionaryKey(shop.getId(), shop.getName()),
+                        shop -> formatDictionaryKey(formatShopId(shop.getId()), shop.getName()),
                         Shop::getId));
+    }
+
+    // Возвращаем только часть UUID, т.к иначе строка выходит слишком длинной
+    private String formatShopId(String shopId) {
+        try {
+            UUID.fromString(shopId);
+            return shopId.substring(0, shopId.indexOf("-")) + "...";
+        } catch (IllegalArgumentException e) {
+            log.warn("Unable to format shopId '{}'", shopId);
+            return shopId;
+        }
     }
 
     private Map<String, String> convertCurrenciesToDictionary(List<Currency> currencies) {
