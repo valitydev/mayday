@@ -1,7 +1,7 @@
 package dev.vality.alerting.mayday.alerttemplate.service;
 
-import dev.vality.alerting.mayday.alerttemplate.model.alerttemplate.DictionaryType;
 import dev.vality.alerting.mayday.alerttemplate.dao.DawayDao;
+import dev.vality.alerting.mayday.alerttemplate.model.alerttemplate.DictionaryType;
 import dev.vality.alerting.mayday.alerttemplate.model.daway.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +63,7 @@ public class DictionaryService {
     private String formatShopId(String shopId) {
         try {
             UUID.fromString(shopId);
-            return shopId.substring(0, shopId.indexOf("-")) + "...";
+            return shopId.substring(0, shopId.indexOf("-"));
         } catch (IllegalArgumentException e) {
             log.warn("Unable to format shopId '{}'", shopId);
             return shopId;

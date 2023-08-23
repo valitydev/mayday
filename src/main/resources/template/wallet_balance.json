@@ -1,0 +1,25 @@
+{
+  "id": "wallet_balance",
+  "readable_name": "Остаток на балансе кошелька",
+  "prometheus_query": "ewb_wallet_balances_amount{wallet_id=\"${wallet_id}\"} < ${wallet_amount_threshold}",
+  "alert_name_template": "Баланс кошелька '${wallet_id}' < ${wallet_amount_threshold}!",
+  "alert_notification_template": "Баланс кошелька '${wallet_id}' меньше ${wallet_amount_threshold}! Текущее значение: {{ $value }}",
+  "parameters": [
+    {
+      "id": 1,
+      "substitution_name": "wallet_id",
+      "readable_name": "Введите идентификатор кошелька",
+      "mandatory": true,
+      "multiple_values": false,
+      "dictionary_name": "wallets"
+    },
+    {
+      "id": 2,
+      "substitution_name": "wallet_amount_threshold",
+      "readable_name": "Введите сумму денег на кошельке в минорных единицах, при достижении которой необходимо прислать алерт",
+      "mandatory": true,
+      "multiple_values": false,
+      "regexp": "^\\d+$"
+    }
+  ]
+}

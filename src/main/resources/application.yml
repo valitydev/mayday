@@ -38,6 +38,7 @@ mayday:
   alertmanager-webhook-path: /alertmanager/webhook
 
 k8s:
+  namespace:
   prometheus-rule:
     labels:
       release: prometheus
