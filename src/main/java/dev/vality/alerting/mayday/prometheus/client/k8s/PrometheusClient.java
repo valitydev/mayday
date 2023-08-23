@@ -62,9 +62,10 @@ public class PrometheusClient {
             if (rule == null) {
                 return Set.of();
             }
-            return rule.getSpec().getGroups().stream()
+            var groupAlerts = rule.getSpec().getGroups().stream()
                     .filter(group -> group.getName().equals(groupName))
                     .findFirst().orElse(new PrometheusRuleSpec.Group()).getRules();
+            return groupAlerts == null ? Set.of() : groupAlerts;
         }
     }
 

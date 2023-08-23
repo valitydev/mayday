@@ -33,10 +33,6 @@ spring:
     username: postgres
     password: postgres
 
-mayday:
-  webhook-url: http://localhost:8022
-  alertmanager-webhook-path: /alertmanager/webhook
-
 k8s:
   namespace:
   prometheus-rule:
