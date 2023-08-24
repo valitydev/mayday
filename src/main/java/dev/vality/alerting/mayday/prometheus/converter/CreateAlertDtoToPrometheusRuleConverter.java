@@ -30,7 +30,7 @@ public class CreateAlertDtoToPrometheusRuleConverter implements Converter<Create
         rule.setDuration(source.getFormattedDurationMinutes());
         rule.setAnnotations(Map.of(PrometheusRuleAnnotation.ALERT_NAME, source.getUserFriendlyAlertName(),
                 PrometheusRuleAnnotation.ALERT_DESCRIPTION, source.getUserFriendlyAlertDescription()));
-        Map<String, String> labels = new HashMap<>(k8sPrometheusRuleProperties.getLabels());
+        Map<String, String> labels = new HashMap<>(k8sPrometheusRuleProperties.getAlertRule().getLabels());
         labels.put(PrometheusRuleLabel.USERNAME, source.getUserId());
         labels.put(PrometheusRuleLabel.SERVICE, applicationName);
         rule.setLabels(labels);
