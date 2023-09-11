@@ -11,7 +11,7 @@
       "readable_name": "Введите идентификатор провайдера (опционально)",
       "mandatory": false,
       "multiple_values": true,
-      "dictionary_name": "providers"
+      "dictionary_name": "payment_providers"
     },
     {
       "id": 2,
@@ -19,7 +19,7 @@
       "readable_name": "Введите идентификатор терминала (опционально)",
       "mandatory": false,
       "multiple_values": true,
-      "dictionary_name": "terminals"
+      "dictionary_name": "payment_terminals"
     },
     {
       "id": 3,

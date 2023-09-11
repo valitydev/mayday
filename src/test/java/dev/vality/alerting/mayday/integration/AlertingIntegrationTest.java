@@ -71,8 +71,8 @@ public class AlertingIntegrationTest {
                 .thenReturn(Optional.of(new PrometheusRule()));
         when(alertmanagerClient.getAlertmanagerConfig(alertmanagerService.getAlertmanagerConfigName()))
                 .thenReturn(Optional.of(new AlertmanagerConfig()));
-        when(dawayDao.getProviders()).thenReturn(DawayObjectUtil.getTestProviders());
-        when(dawayDao.getTerminals()).thenReturn(DawayObjectUtil.getTestTerminals());
+        when(dawayDao.getPaymentProviders()).thenReturn(DawayObjectUtil.getTestProviders());
+        when(dawayDao.getPaymentTerminals()).thenReturn(DawayObjectUtil.getTestTerminals());
         when(dawayDao.getShops()).thenReturn(DawayObjectUtil.getTestShops());
 
         var createAlertRequest =
@@ -87,8 +87,8 @@ public class AlertingIntegrationTest {
         verify(alertmanagerClient, times(1))
                 .addRouteIfNotExists(eq(alertmanagerService.getAlertmanagerConfigName()), any());
 
-        verify(dawayDao, times(2)).getProviders();
-        verify(dawayDao, times(2)).getTerminals();
+        verify(dawayDao, times(2)).getPaymentProviders();
+        verify(dawayDao, times(2)).getPaymentTerminals();
         verify(dawayDao, times(2)).getShops();
     }
 

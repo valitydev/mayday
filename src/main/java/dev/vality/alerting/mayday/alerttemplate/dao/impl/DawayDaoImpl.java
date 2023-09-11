@@ -22,15 +22,45 @@ public class DawayDaoImpl implements DawayDao {
 
 
     @Override
-    public List<Terminal> getTerminals() {
+    public List<Terminal> getAllTerminals() {
         return jdbcTemplate
                 .query("select terminal_ref_id, name from dw.terminal where current = true", terminalRowMapper);
     }
 
     @Override
-    public List<Provider> getProviders() {
+    public List<Terminal> getPaymentTerminals() {
+        return jdbcTemplate
+                .query("select t.terminal_ref_id, t.name from dw.terminal as t inner join dw.provider as p on t" +
+                        ".terminal_provider_ref_id = p.provider_ref_id and p.current and p.payment_terms_json is not " +
+                        "null where t.current", terminalRowMapper);
+    }
+
+    @Override
+    public List<Terminal> getPayoutTerminals() {
+        return jdbcTemplate
+                .query("select t.terminal_ref_id, t.name from dw.terminal as t inner join dw.provider as p on t" +
+                        ".terminal_provider_ref_id = p.provider_ref_id and p.current and p.wallet_terms_json is not " +
+                        "null where t.current", terminalRowMapper);
+    }
+
+    @Override
+    public List<Provider> getAllProviders() {
         return jdbcTemplate
                 .query("select provider_ref_id, name from dw.provider where current = true", providerRowMapper);
+    }
+
+    @Override
+    public List<Provider> getPaymentProviders() {
+        return jdbcTemplate
+                .query("select provider_ref_id, name from dw.provider where current = true and payment_terms_json is " +
+                        "not null", providerRowMapper);
+    }
+
+    @Override
+    public List<Provider> getPayoutProviders() {
+        return jdbcTemplate
+                .query("select provider_ref_id, name from dw.provider where current = true and wallet_terms_json is " +
+                        "not null", providerRowMapper);
     }
 
     @Override

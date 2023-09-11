@@ -6,9 +6,17 @@ import java.util.List;
 
 public interface DawayDao {
 
-    List<Terminal> getTerminals();
+    List<Terminal> getAllTerminals();
 
-    List<Provider> getProviders();
+    List<Terminal> getPaymentTerminals();
+
+    List<Terminal> getPayoutTerminals();
+
+    List<Provider> getAllProviders();
+
+    List<Provider> getPaymentProviders();
+
+    List<Provider> getPayoutProviders();
 
     List<Shop> getShops();
 

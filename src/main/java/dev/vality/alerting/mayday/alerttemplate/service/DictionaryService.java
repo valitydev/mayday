@@ -21,8 +21,12 @@ public class DictionaryService {
 
     public Map<String, String> getDictionary(DictionaryType type) {
         return switch (type) {
-            case TERMINALS -> convertTerminalsToDictionary(dawayDao.getTerminals());
-            case PROVIDERS -> convertProvidersToDictionary(dawayDao.getProviders());
+            case TERMINALS -> convertTerminalsToDictionary(dawayDao.getAllTerminals());
+            case PAYMENT_TERMINALS -> convertTerminalsToDictionary(dawayDao.getPaymentTerminals());
+            case PAYOUT_TERMINALS -> convertTerminalsToDictionary(dawayDao.getPayoutTerminals());
+            case PROVIDERS -> convertProvidersToDictionary(dawayDao.getAllProviders());
+            case PAYMENT_PROVIDERS -> convertProvidersToDictionary(dawayDao.getPaymentProviders());
+            case PAYOUT_PROVIDERS -> convertProvidersToDictionary(dawayDao.getPayoutProviders());
             case WALLETS -> convertWalletsToDictionary(dawayDao.getWallets());
             case SHOPS -> convertShopsToDictionary(dawayDao.getShops());
             case CURRENCIES -> convertCurrenciesToDictionary(dawayDao.getCurrencies());

@@ -8,8 +8,16 @@ public enum DictionaryType {
 
     @JsonProperty("terminals")
     TERMINALS,
+    @JsonProperty("payment_terminals")
+    PAYMENT_TERMINALS,
+    @JsonProperty("payout_terminals")
+    PAYOUT_TERMINALS,
     @JsonProperty("providers")
     PROVIDERS,
+    @JsonProperty("payment_providers")
+    PAYMENT_PROVIDERS,
+    @JsonProperty("payout_providers")
+    PAYOUT_PROVIDERS,
     @JsonProperty("wallets")
     WALLETS,
     @JsonProperty("shops")
