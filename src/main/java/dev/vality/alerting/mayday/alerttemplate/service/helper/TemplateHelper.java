@@ -96,7 +96,7 @@ public class TemplateHelper {
         return params;
     }
 
-    private static void validateMultipleValues(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
+    private void validateMultipleValues(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
                                                List<ParameterInfo> externalParamInfos) {
         if (externalParamInfos.size() > 1 && !maydayParamInfo.getMultipleValues()) {
             throw new AlertConfigurationException(String.format("Parameter '%s' cannot have " +
