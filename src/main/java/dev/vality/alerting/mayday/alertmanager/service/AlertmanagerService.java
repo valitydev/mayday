@@ -11,7 +11,6 @@ import dev.vality.alerting.mayday.common.constant.AlertConfigurationRequiredPara
 import dev.vality.alerting.mayday.common.constant.PrometheusRuleLabel;
 import dev.vality.alerting.mayday.common.dto.CreateAlertDto;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,16 +31,19 @@ public class AlertmanagerService {
     private final AlertmanagerClient alertmanagerClient;
     @Value("${spring.application.name}")
     private String applicationName;
-    @Getter
-    private final String alertmanagerConfigName = "%s-managed-config".formatted(applicationName);
+    private final String alertmanagerConfigNameTemplate = "%s-managed-config";
 
     public void createUserRoute(CreateAlertDto createAlertDto) {
-        if (alertmanagerClient.getAlertmanagerConfig(alertmanagerConfigName).isEmpty()) {
-            log.info("Alertmanager config '{}' not found and will be created", alertmanagerConfigName);
+        if (alertmanagerClient.getAlertmanagerConfig(getAlertmanagerConfigName()).isEmpty()) {
+            log.info("Alertmanager config '{}' not found and will be created", getAlertmanagerConfigName());
             alertmanagerClient.createAlertmanagerConfig(buildAlertmanagerConfig());
-            log.info("Alertmanager config '{}' was created successfully", alertmanagerConfigName);
+            log.info("Alertmanager config '{}' was created successfully", getAlertmanagerConfigName());
         }
-        alertmanagerClient.addRouteIfNotExists(alertmanagerConfigName, buildRoute(createAlertDto));
+        alertmanagerClient.addRouteIfNotExists(getAlertmanagerConfigName(), buildRoute(createAlertDto));
+    }
+
+    public String getAlertmanagerConfigName() {
+        return alertmanagerConfigNameTemplate.formatted(applicationName);
     }
 
     private AlertmanagerConfig buildAlertmanagerConfig() {
@@ -105,27 +107,27 @@ public class AlertmanagerService {
     private ObjectMeta buildAlertmanagerConfigMetadata() {
         var metadata = new ObjectMeta();
         metadata.setLabels(k8sAlertmanagerProperties.getLabels());
-        metadata.setName(alertmanagerConfigName);
+        metadata.setName(getAlertmanagerConfigName());
         return metadata;
     }
 
     public void deleteUserRoute(String alertId) {
-        if (alertmanagerClient.getAlertmanagerConfig(alertmanagerConfigName).isEmpty()) {
-            log.warn("Alertmanager config '{}' not found, no need to delete user route", alertmanagerConfigName);
+        if (alertmanagerClient.getAlertmanagerConfig(getAlertmanagerConfigName()).isEmpty()) {
+            log.warn("Alertmanager config '{}' not found, no need to delete user route", getAlertmanagerConfigName());
             return;
         }
-        alertmanagerClient.deleteRoute(alertmanagerConfigName, alertId);
+        alertmanagerClient.deleteRoute(getAlertmanagerConfigName(), alertId);
     }
 
     public void deleteUserRoutes(String userId) {
-        if (alertmanagerClient.getAlertmanagerConfig(alertmanagerConfigName).isEmpty()) {
-            log.warn("Alertmanager config '{}' not found, no need to delete user route", alertmanagerConfigName);
+        if (alertmanagerClient.getAlertmanagerConfig(getAlertmanagerConfigName()).isEmpty()) {
+            log.warn("Alertmanager config '{}' not found, no need to delete user route", getAlertmanagerConfigName());
             return;
         }
-        alertmanagerClient.deleteRoutes(alertmanagerConfigName, userId);
+        alertmanagerClient.deleteRoutes(getAlertmanagerConfigName(), userId);
     }
 
     public boolean containsUserRoute(String userId, String alertName) {
-        return alertmanagerClient.containsRoute(alertmanagerConfigName, userId, alertName);
+        return alertmanagerClient.containsRoute(getAlertmanagerConfigName(), userId, alertName);
     }
 }
