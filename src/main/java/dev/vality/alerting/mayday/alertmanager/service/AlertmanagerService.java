@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class AlertmanagerService {
     private final AlertmanagerClient alertmanagerClient;
     @Value("${spring.application.name}")
     private String applicationName;
-    private final String alertmanagerConfigNameTemplate = "%s-managed-config";
+    private String alertmanagerConfigName;
 
     public void createUserRoute(CreateAlertDto createAlertDto) {
         if (alertmanagerClient.getAlertmanagerConfig(getAlertmanagerConfigName()).isEmpty()) {
@@ -43,7 +44,10 @@ public class AlertmanagerService {
     }
 
     public String getAlertmanagerConfigName() {
-        return alertmanagerConfigNameTemplate.formatted(applicationName);
+        if (ObjectUtils.isEmpty(alertmanagerConfigName)) {
+            alertmanagerConfigName = "%s-managed-rule".formatted(applicationName);
+        }
+        return alertmanagerConfigName;
     }
 
     private AlertmanagerConfig buildAlertmanagerConfig() {
