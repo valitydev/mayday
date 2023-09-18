@@ -2,8 +2,8 @@
   "id": "limit_payment_terminal_daily",
   "readable_name": "Суточный лимит платежей по терминалу",
   "prometheus_query": "round(100 * sum(el_payment_limits_amount_by_calendar{time_range_type_calendar=\"day\", limit_scope_types=\"terminal\", limit_type_turnover_metric=\"amount\", terminal_id=\"${terminal_id}\", shop_id=\"${shop_id}\", provider_id=\"${provider_id}\"}/el_payment_limits_boundary_by_calendar{time_range_type_calendar=\"day\", limit_scope_types=\"terminal\", limit_type_turnover_metric=\"amount\", terminal_id=\"${terminal_id}\", shop_id=\"${shop_id}\", provider_id=\"${provider_id}\"}), 1) > ${limit_percentage_threshold}",
-  "alert_name_template": "Суточный лимит для терминала '${terminal_id}', магазина '${shop_id}' и провайдера '${provider_id}' израсходован на ${limit_percentage_threshold}%",
-  "alert_notification_template": "Суточный лимит для терминала '${terminal_id}', магазина '${shop_id}' и провайдера '${provider_id}' израсходован на {{ $value }}%",
+  "alert_name_template": "Суточный лимит платежей для терминала '${terminal_id}', магазина '${shop_id}' и провайдера '${provider_id}' израсходован на ${limit_percentage_threshold}%",
+  "alert_notification_template": "Суточный лимит платежей для терминала '${terminal_id}', магазина '${shop_id}' и провайдера '${provider_id}' израсходован на {{ $value }}%",
   "parameters": [
     {
       "id": 1,
