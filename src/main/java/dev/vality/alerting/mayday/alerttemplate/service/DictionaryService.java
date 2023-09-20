@@ -30,6 +30,16 @@ public class DictionaryService {
             case WALLETS -> convertWalletsToDictionary(dawayDao.getWallets());
             case SHOPS -> convertShopsToDictionary(dawayDao.getShops());
             case CURRENCIES -> convertCurrenciesToDictionary(dawayDao.getCurrencies());
+            case PAYMENT_LIMIT_SCOPES -> Map.of("Провайдер", "provider",
+                    "Провайдер + терминал", "provider,terminal",
+                    "Провайдер + терминал + магазин", "provider,shop,terminal",
+                    "Терминал", "terminal",
+                    "Магазин", "shop");
+            case PAYOUT_LIMIT_SCOPES -> Map.of("Провайдер", "provider",
+                    "Провайдер + терминал", "provider,terminal",
+                    "Провайдер + терминал + кошелек", "provider,terminal,wallet",
+                    "Терминал", "terminal",
+                    "Кошелёк", "wallet");
             case CONDITIONAL_BOUNDARIES -> Map.of("Больше порогового значения", ">", "Меньше порогового значения", "<");
             case TIME_INTERVAL_BOUNDARIES -> Map.of("Да", "unless", "Нет", "and");
         };

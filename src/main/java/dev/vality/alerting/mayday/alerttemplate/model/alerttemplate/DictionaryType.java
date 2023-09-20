@@ -22,6 +22,10 @@ public enum DictionaryType {
     WALLETS,
     @JsonProperty("shops")
     SHOPS,
+    @JsonProperty("payment_limit_scopes")
+    PAYMENT_LIMIT_SCOPES,
+    @JsonProperty("payout_limit_scopes")
+    PAYOUT_LIMIT_SCOPES,
     @JsonProperty("boundaries")
     CONDITIONAL_BOUNDARIES,
     @JsonProperty("currencies")
