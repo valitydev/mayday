@@ -12,7 +12,6 @@ public class K8sObjectUtil {
     public static PrometheusRuleSpec.Rule testPrometheusRule() {
         var rule =  new PrometheusRuleSpec.Rule();
         rule.setAlert("test_alert");
-        rule.setDuration("5m");
         rule.setExpr("vector(1)");
         rule.setAnnotations(Map.of(PrometheusRuleAnnotation.ALERT_NAME, "тестовый алерт"));
         return rule;

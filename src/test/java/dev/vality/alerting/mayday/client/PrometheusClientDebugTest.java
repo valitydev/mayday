@@ -64,7 +64,6 @@ class PrometheusClientDebugTest {
         PrometheusRuleSpec.Rule rule = new PrometheusRuleSpec.Rule();
         rule.setAlert(alertName);
         rule.setExpr("vector(1)");
-        rule.setDuration("5m");
         rule.setAnnotations(Map.of("readable_name", "тестовый алерт"));
         client.addAlertToPrometheusRuleGroup(ruleName, groupName, rule);
     }

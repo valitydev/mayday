@@ -30,8 +30,6 @@ public class PrometheusRuleSpec {
         private String record;
         private String alert;
         private String expr;
-        @JsonProperty("for")
-        private String duration;
         @JsonProperty("keep_firing_for")
         private String keepFiringFor;
         private Map<String, String> labels;

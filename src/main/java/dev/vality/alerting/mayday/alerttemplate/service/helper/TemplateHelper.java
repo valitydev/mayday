@@ -49,10 +49,6 @@ public class TemplateHelper {
                 .userFriendlyAlertName(prepareUserFriendlyAlertName(metricTemplate, parameters))
                 .userFriendlyAlertDescription(prepareMetricAlertMessage(metricTemplate, parameters))
                 .parameters(parameters)
-                .formattedDurationMinutes(
-                        formatDuration(parameters
-                                .get(String.valueOf(AlertConfigurationRequiredParameter.RULE_CHECK_DURATION_MINUTES
-                                        .getSubstitutionName())).get(0)))
                 .build();
     }
 

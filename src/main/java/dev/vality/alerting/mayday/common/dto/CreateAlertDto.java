@@ -15,5 +15,4 @@ public class CreateAlertDto {
     private String userFriendlyAlertName;
     private String userFriendlyAlertDescription;
     private Map<String, List<String>> parameters;
-    private String formattedDurationMinutes;
 }
