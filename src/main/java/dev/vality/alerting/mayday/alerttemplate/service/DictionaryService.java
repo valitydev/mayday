@@ -42,6 +42,8 @@ public class DictionaryService {
                     "Кошелёк", "wallet");
             case CONDITIONAL_BOUNDARIES -> Map.of("Больше порогового значения", ">", "Меньше порогового значения", "<");
             case TIME_INTERVAL_BOUNDARIES -> Map.of("Да", "unless", "Нет", "and");
+            case AGGREGATION_INTERVALS -> Map.of("5 минут", "5m", "15 минут", "15m", "30 минут", "30m",
+                    "1 час", "1h", "3 часа", "3h", "6 часов", "6h", "12 часа", "12h", "24 часа", "24h");
         };
     }
 

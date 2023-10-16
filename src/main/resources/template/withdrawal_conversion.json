@@ -1,9 +1,9 @@
 {
   "id": "withdrawal_conversion",
   "readable_name": "Конверсия выплат",
-  "prometheus_query": "round(100 * sum(sum_over_time(ebm_withdrawals_final_status_count{provider_id=~\"${provider_id}\", terminal_id=~\"${terminal_id}\",wallet_id=~\"${wallet_id}\",status=\"succeeded\"}[${conversion_period_minutes}m])) / sum(sum_over_time(ebm_withdrawals_final_status_count{provider_id=~\"${provider_id}\",terminal_id=~\"${terminal_id}\",wallet_id=~\"${wallet_id}\",status=~\"succeeded|failed\"}[${conversion_period_minutes}m])), 1) ${boundary_type} ${conversion_rate_threshold}",
-  "alert_name_template": "Конверсия выплат по провайдеру '${provider_id}', терминалу '${terminal_id}' и кошельку '${wallet_id}' за последние ${conversion_period_minutes} минут ${boundary_type} ${conversion_rate_threshold}%",
-  "alert_notification_template": "Конверсия выплат по провайдеру '${provider_id}', терминалу '${terminal_id}' и кошельку '${wallet_id}' за последние ${conversion_period_minutes} минут ${boundary_type} ${conversion_rate_threshold}%! Текущее значение: {{ $value }}%",
+  "prometheus_query": "round(100 * sum(ebm_withdrawals_status_count{provider_id=~\"${provider_id}\", terminal_id=~\"${terminal_id}\",wallet_id=~\"${wallet_id}\",duration=\"${aggr_period}\",status=\"succeeded\"}) / sum(ebm_withdrawals_status_count{provider_id=~\"${provider_id}\",terminal_id=~\"${terminal_id}\",wallet_id=~\"${wallet_id}\",duration=\"${aggr_period}\"}), 1) ${boundary_type} ${conversion_rate_threshold}",
+  "alert_name_template": "Конверсия выплат по провайдеру '${provider_id}', терминалу '${terminal_id}' и кошельку '${wallet_id}' за период: ${aggr_period} ${boundary_type} ${conversion_rate_threshold}%",
+  "alert_notification_template": "Конверсия выплат по провайдеру '${provider_id}', терминалу '${terminal_id}' и кошельку '${wallet_id}' за период: ${aggr_period} ${boundary_type} ${conversion_rate_threshold}%! Текущее значение: {{ $value }}%",
   "parameters": [
     {
       "id": 1,
@@ -45,10 +45,10 @@
     },
     {
       "id": 6,
-      "substitution_name": "conversion_period_minutes",
-      "readable_name": "Период в минутах, за который необходимо проверять конверсию (Пример: 60)",
+      "substitution_name": "aggr_period",
+      "readable_name": "Период в минутах, за который необходимо проверять количество конверсию (Пример: 60)",
       "mandatory": true,
-      "regexp": "^\\d+$"
+      "dictionary_name": "aggregation_intervals"
     }
   ]
 }
