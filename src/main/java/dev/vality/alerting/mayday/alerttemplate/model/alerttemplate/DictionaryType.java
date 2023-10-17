@@ -31,6 +31,8 @@ public enum DictionaryType {
     @JsonProperty("currencies")
     CURRENCIES,
     @JsonProperty("time_interval_boundaries")
-    TIME_INTERVAL_BOUNDARIES;
+    TIME_INTERVAL_BOUNDARIES,
+    @JsonProperty("aggregation_intervals")
+    AGGREGATION_INTERVALS;
 
 }

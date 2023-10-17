@@ -45,7 +45,7 @@ public class ThriftObjectUtil {
 
         var periodParameter = new ParameterInfo();
         periodParameter.setId("6");
-        periodParameter.setValue("10");
+        periodParameter.setValue("15 минут");
         parameters.add(periodParameter);
 
         var ruleCheckDurationParameter = new ParameterInfo();
