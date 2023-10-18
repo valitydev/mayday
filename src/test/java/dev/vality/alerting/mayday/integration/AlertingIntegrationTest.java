@@ -74,6 +74,7 @@ public class AlertingIntegrationTest {
         when(dawayDao.getPaymentProviders()).thenReturn(DawayObjectUtil.getTestProviders());
         when(dawayDao.getPaymentTerminals()).thenReturn(DawayObjectUtil.getTestTerminals());
         when(dawayDao.getShops()).thenReturn(DawayObjectUtil.getTestShops());
+        when(dawayDao.getCurrencies()).thenReturn(DawayObjectUtil.getTestCurrencies());
 
         var createAlertRequest =
                 ThriftObjectUtil.testCreatePaymentConversionAlertRequest(getPaymentConversionAlertConfiguration());
@@ -90,6 +91,7 @@ public class AlertingIntegrationTest {
         verify(dawayDao, times(2)).getPaymentProviders();
         verify(dawayDao, times(2)).getPaymentTerminals();
         verify(dawayDao, times(2)).getShops();
+        verify(dawayDao, times(2)).getCurrencies();
     }
 
     @Test

@@ -1,5 +1,6 @@
 package dev.vality.alerting.mayday.testutil;
 
+import dev.vality.alerting.mayday.alerttemplate.model.daway.Currency;
 import dev.vality.alerting.mayday.alerttemplate.model.daway.Provider;
 import dev.vality.alerting.mayday.alerttemplate.model.daway.Shop;
 import dev.vality.alerting.mayday.alerttemplate.model.daway.Terminal;
@@ -31,6 +32,14 @@ public class DawayObjectUtil {
                 Shop.builder()
                         .id("def91399-75ff-4307-8634-626c85859ea4")
                         .name("test").build()
+        );
+    }
+
+    public static List<Currency> getTestCurrencies() {
+        return List.of(
+                Currency.builder()
+                        .symbolicCode("RUB")
+                        .name("Рублик").build()
         );
     }
 }

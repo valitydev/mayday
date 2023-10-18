@@ -33,18 +33,23 @@ public class ThriftObjectUtil {
         shopParameter.setValue("(def91399) test");
         parameters.add(shopParameter);
 
+        var currencyParameter = new ParameterInfo();
+        currencyParameter.setId("4");
+        currencyParameter.setValue("RUB");
+        parameters.add(currencyParameter);
+
         var boundaryParameter = new ParameterInfo();
-        boundaryParameter.setId("4");
+        boundaryParameter.setId("5");
         boundaryParameter.setValue("Больше порогового значения");
         parameters.add(boundaryParameter);
 
         var thresholdParameter = new ParameterInfo();
-        thresholdParameter.setId("5");
+        thresholdParameter.setId("6");
         thresholdParameter.setValue("10");
         parameters.add(thresholdParameter);
 
         var periodParameter = new ParameterInfo();
-        periodParameter.setId("6");
+        periodParameter.setId("7");
         periodParameter.setValue("15 минут");
         parameters.add(periodParameter);
 
