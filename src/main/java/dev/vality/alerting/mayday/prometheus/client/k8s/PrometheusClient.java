@@ -92,7 +92,8 @@ public class PrometheusClient {
             var rule =
                     prometheusRuleClient.inNamespace(client.getNamespace()).withName(ruleName).get();
             var resource = prometheusRuleClient.inNamespace(client.getNamespace()).resource(rule);
-            resource.edit(modifyFunc);
+            var response = resource.edit(modifyFunc);
+            log.info("Rule after modification: {}", response);
         }
     }
 
