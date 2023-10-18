@@ -35,7 +35,7 @@ public class ThriftObjectUtil {
 
         var currencyParameter = new ParameterInfo();
         currencyParameter.setId("4");
-        currencyParameter.setValue("RUB");
+        currencyParameter.setValue("(RUB) Рублик");
         parameters.add(currencyParameter);
 
         var boundaryParameter = new ParameterInfo();
