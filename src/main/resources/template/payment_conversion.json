@@ -1,0 +1,62 @@
+{
+  "id": "payment_conversion",
+  "readable_name": "Конверсия платежей",
+  "prometheus_query": "round(100 * sum(ebm_payments_status_count{provider_id=~\"${provider_id}\", terminal_id=~\"${terminal_id}\",shop_id=~\"${shop_id}\",currency=~\"${currency}\",duration=\"${conversion_period}\",status=\"captured\"}) / sum(ebm_payments_status_count{provider_id=~\"${provider_id}\",terminal_id=~\"${terminal_id}\",shop_id=~\"${shop_id}\",currency=~\"${currency}\",duration=\"${conversion_period}\"}), 1) ${boundary_type} ${conversion_rate_threshold}",
+  "alert_name_template": "Конверсия платежей по провайдеру '${provider_id}', терминалу '${terminal_id}', валюте '${currency}' и магазину '${shop_id}' за период: ${conversion_period} ${boundary_type} ${conversion_rate_threshold}%",
+  "alert_notification_template": "Конверсия платежей по провайдеру '${provider_id}', терминалу '${terminal_id}', валюте '${currency}' и магазину '${shop_id}' за период: ${conversion_period} ${boundary_type} ${conversion_rate_threshold}%! Текущее значение: {{ $value }}%",
+  "parameters": [
+    {
+      "id": 1,
+      "substitution_name": "provider_id",
+      "readable_name": "Введите идентификатор провайдера (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "payment_providers"
+    },
+    {
+      "id": 2,
+      "substitution_name": "terminal_id",
+      "readable_name": "Введите идентификатор терминала (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "payment_terminals"
+    },
+    {
+      "id": 3,
+      "substitution_name": "shop_id",
+      "readable_name": "Введите идентификатор магазина (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "shops"
+    },
+    {
+      "id": 4,
+      "substitution_name": "currency",
+      "readable_name": "Введите код валюты (опционально)",
+      "mandatory": false,
+      "multiple_values": false,
+      "dictionary_name": "currencies"
+    },
+    {
+      "id": 5,
+      "substitution_name": "boundary_type",
+      "readable_name": "Выберите тип условия для алерта",
+      "mandatory": true,
+      "dictionary_name": "boundaries"
+    },
+    {
+      "id": 6,
+      "substitution_name": "conversion_rate_threshold",
+      "readable_name": "Введите порог конверсии в процентах (Пример: 85)",
+      "mandatory": true,
+      "regexp": "^[0-9][0-9]?$|^100$"
+    },
+    {
+      "id": 7,
+      "substitution_name": "conversion_period",
+      "readable_name": "Период в минутах, за который необходимо проверять конверсию",
+      "mandatory": true,
+      "dictionary_name": "aggregation_intervals"
+    }
+  ]
+}

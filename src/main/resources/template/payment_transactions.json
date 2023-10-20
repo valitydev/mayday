@@ -1,0 +1,55 @@
+{
+  "id": "payment_transactions",
+  "readable_name": "Количество платежных транзакций",
+  "prometheus_query": "(sum(ebm_payments_status_count{terminal_id=~\"${terminal_id}\",provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",duration=\"${aggr_period}\"}) OR on() vector(0)) ${boundary_type} ${transaction_num_threshold}",
+  "alert_name_template": "Количество платежных транзакций у провайдера ${provider_id}, терминала ${terminal_id} и магазина ${shop_id} за период: ${aggr_period} ${boundary_type} ${transaction_num_threshold}",
+  "alert_notification_template": "Количество платежных транзакций у провайдера ${provider_id}, терминала ${terminal_id} и магазина ${shop_id} за период: ${aggr_period} ${boundary_type} ${transaction_num_threshold}! Текущее значение: {{ $value }}",
+  "parameters": [
+    {
+      "id": 1,
+      "substitution_name": "provider_id",
+      "readable_name": "Введите идентификатор провайдера (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "payment_providers"
+    },
+    {
+      "id": 2,
+      "substitution_name": "terminal_id",
+      "readable_name": "Введите идентификатор терминала (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "payment_terminals"
+    },
+    {
+      "id": 3,
+      "substitution_name": "shop_id",
+      "readable_name": "Введите идентификатор магазина (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "shops"
+    },
+    {
+      "id": 4,
+      "substitution_name": "boundary_type",
+      "readable_name": "Выберите тип условия для алерта",
+      "mandatory": true,
+      "dictionary_name": "boundaries"
+    },
+    {
+      "id": 5,
+      "substitution_name": "transaction_num_threshold",
+      "readable_name": "Введите пороговое количество транзакций (Пример: 10000)",
+      "mandatory": true,
+      "regexp": "^\\d+$"
+    },
+    {
+      "id": 6,
+      "substitution_name": "aggr_period",
+      "readable_name": "Период, за который необходимо проверять количество транзакций (Пример: 60)",
+      "mandatory": true,
+      "dictionary_name": "aggregation_intervals"
+    }
+  ]
+
+}

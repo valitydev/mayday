@@ -1,0 +1,60 @@
+server:
+  port: '8022'
+
+management:
+  server:
+    port: '${management.port}'
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+spring:
+  application:
+    name: 'mayday'
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/daway
+    username: postgres
+    password: postgres
+
+k8s:
+  namespace:
+  prometheus-rule:
+    labels:
+      release: prometheus
+    alert-rule:
+      labels:
+        # Лейбл с неймспейсом необходим, поскольку алертменеджер по умолчанию начинает фильтровать по нему.
+        # Тут описано более подробно: https://github.com/prometheus-operator/prometheus-operator/discussions/3733
+        namespace: default
+  alertmanager-configuration:
+    labels:
+      alertmanager: alertmanager
+alertmanager:
+  webhook:
+    url: http://localhost:8022
+    path: /alertmanager/webhook
+  receiver:
+    telegram-bot:
+      url: http://telegram:1234/endp
+
+
+testcontainers:
+  postgresql:
+    tag: '13'

@@ -1,0 +1,48 @@
+{
+  "id": "limit_withdrawal",
+  "readable_name": "Лимит для выплат",
+  "prometheus_query": "round(100 * (el_payout_limits_amount_by_calendar{provider_id=~\"${provider_id}\", terminal_id=~\"${terminal_id}\", wallet_id=~\"${wallet_id}\", limit_scope_types=\"${limit_scope}\"}/el_payout_limits_boundary_by_calendar{provider_id=~\"${provider_id}\", terminal_id=~\"${terminal_id}\", wallet_id=~\"${wallet_id}\", limit_scope_types=\"${limit_scope}\"}), 1) > ${limit_percentage_threshold}",
+  "alert_name_template": "Месячный лимит выплат для терминала '${terminal_id}', кошелька '${wallet_id}', провайдера '${provider_id}' c глубиной '${limit_scope}' израсходован на ${limit_percentage_threshold}%",
+  "alert_notification_template": "Месячный лимит выплат для терминала '${terminal_id}', кошелька '${wallet_id}', провайдера '${provider_id}' c глубиной '${limit_scope}' израсходован на {{ $value }}%",
+  "parameters": [
+    {
+      "id": 1,
+      "substitution_name": "limit_scope",
+      "readable_name": "Введите глубину лимита",
+      "mandatory": true,
+      "multiple_values": false,
+      "dictionary_name": "payout_limit_scopes"
+    },
+    {
+      "id": 2,
+      "substitution_name": "provider_id",
+      "readable_name": "Введите идентификатор провайдера",
+      "mandatory": false,
+      "multiple_values": false,
+      "dictionary_name": "payout_providers"
+    },
+    {
+      "id": 3,
+      "substitution_name": "terminal_id",
+      "readable_name": "Введите идентификатор терминала",
+      "mandatory": false,
+      "multiple_values": false,
+      "dictionary_name": "payout_terminals"
+    },
+    {
+      "id": 4,
+      "substitution_name": "wallet_id",
+      "readable_name": "Введите идентификатор кошелька",
+      "mandatory": false,
+      "multiple_values": false,
+      "dictionary_name": "wallets"
+    },
+    {
+      "id": 5,
+      "substitution_name": "limit_percentage_threshold",
+      "readable_name": "Введите степень израсходования лимита в процентах (Пример: 85), при достижении которой вас необходимо уведомить",
+      "mandatory": true,
+      "regexp": "^[0-9][0-9]?$|^100$"
+    }
+  ]
+}
