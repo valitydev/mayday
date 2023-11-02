@@ -3,7 +3,7 @@
   "readable_name": "Оборот (платежи)",
   "prometheus_query": "(sum(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\",currency=\"${currency}\",duration=\"${aggr_period}\"}) OR on() vector(0)) ${boundary_type} ${amount_threshold}",
   "alert_name_template": "Оборот платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' с валютой '${currency}' за период: ${aggr_period} ${boundary_type} ${amount_threshold}",
-  "alert_notification_template": "Оборот платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' с валютой '${currency}' за период: ${aggr_period} ${boundary_type} ${amount_threshold}! Текущее значение: {{ $value }}",
+  "alert_notification_template": "Оборот платежей по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' с валютой '${currency}' за период: ${aggr_period} ${boundary_type} ${amount_threshold}! Текущее значение: {{ humanize $value }}",
   "parameters": [
     {
       "id": 1,
