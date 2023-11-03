@@ -1,9 +1,9 @@
 {
   "id": "payout_limit_custom_hours",
   "readable_name": "Оборот (выплаты)",
-  "prometheus_query": "(sum(ebm_withdrawals_amount{provider_id=~\"${provider_id}\",wallet_id=~\"${wallet_id}\",status=\"succeeded\",terminal_id=~\"${terminal_id}\",currency=\"${currency}\",duration=\"${aggr_period}\"}) OR on() vector(0)) ${boundary_type} ${amount_threshold}",
+  "prometheus_query": "(sum(ebm_withdrawals_amount{provider_id=~\"${provider_id}\",wallet_id=~\"${wallet_id}\",status=\"succeeded\",terminal_id=~\"${terminal_id}\",currency=~\"${currency}\",duration=\"${aggr_period}\"}) OR on() vector(0)) ${boundary_type} ${amount_threshold}",
   "alert_name_template": "Оборот выплат по провайдеру '${provider_id}', терминалу '${terminal_id}' и кошельку '${wallet_id}' с валютой '${currency}' за период: ${aggr_period} ${boundary_type} ${amount_threshold}",
-  "alert_notification_template": "Оборот выплат по провайдеру '${provider_id}', терминалу '${terminal_id}' и кошельку '${wallet_id}' с валютой '${currency}' ${boundary_type} ${amount_threshold}! Текущее значение: {{printf \"%f\" $value }}",
+  "alert_notification_template": "Оборот выплат по провайдеру '${provider_id}', терминалу '${terminal_id}' и кошельку '${wallet_id}' с валютой '${currency}' ${boundary_type} ${amount_threshold}! Текущее значение: {{printf \"%d\" $value }}",
   "parameters": [
     {
       "id": 1,
