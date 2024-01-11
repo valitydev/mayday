@@ -66,15 +66,16 @@ public class AlertmanagerService {
         route.setReceiver(applicationName);
         route.setGroupBy(Set.of(PrometheusRuleLabel.ALERT_NAME));
         route.setGroupWait(ONE_SEC_WAIT);
-        route.setGroupInterval(ONE_SEC_WAIT);
+        String repeatInterval = FormatUtil.formatMinutesDuration(createAlertDto.getParameters()
+                .get(String.valueOf(
+                        AlertConfigurationRequiredParameter.ALERT_REPEAT_MINUTES.getSubstitutionName())).get(0));
+        route.setGroupInterval(repeatInterval);
         var alertnameMatcher =
                 AlertmanagerFunctionsUtil.createMatcher(PrometheusRuleLabel.ALERT_NAME, createAlertDto.getAlertId());
         var usernameMatcher =
                 AlertmanagerFunctionsUtil.createMatcher(PrometheusRuleLabel.USERNAME, createAlertDto.getUserId());
         route.setMatchers(Set.of(alertnameMatcher, usernameMatcher));
-        route.setRepeatInterval(FormatUtil.formatMinutesDuration(createAlertDto.getParameters()
-                .get(String.valueOf(
-                        AlertConfigurationRequiredParameter.ALERT_REPEAT_MINUTES.getSubstitutionName())).get(0)));
+        route.setRepeatInterval(repeatInterval);
         return route;
     }
 
