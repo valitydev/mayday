@@ -47,7 +47,7 @@
     {
       "id": 6,
       "substitution_name": "amount_threshold",
-      "readable_name": "Введите пороговое значение суммы",
+      "readable_name": "Введите пороговое значение суммы в минорных единицах",
       "mandatory": true,
       "regexp": "^\\d+$"
     },
