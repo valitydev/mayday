@@ -16,8 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -64,11 +63,15 @@ public class PrometheusClient {
             if (rule == null) {
                 return Set.of();
             }
-            return rule.getSpec().getGroups().stream()
+            List<PrometheusRuleSpec.Rule> rules = rule.getSpec().getGroups().stream()
                     .flatMap(group -> group.getRules().stream()
                             .filter(rule1 -> rule1.getLabels().containsKey(PrometheusRuleLabel.USERNAME)
                             && rule1.getLabels().get(PrometheusRuleLabel.USERNAME).equals(groupName)))
-                    .collect(Collectors.toSet());
+                    .toList();
+
+            Map<String, PrometheusRuleSpec.Rule> distinctRules = new HashMap<>();
+            rules.forEach(rule1 -> distinctRules.put(rule1.getAlert(), rule1));
+            return new HashSet<>(distinctRules.values());
         }
     }
 
