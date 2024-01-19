@@ -33,6 +33,7 @@ public class PrometheusFunctionsUtil {
     public static UnaryOperator<PrometheusRule> getRemoveAlertByGroupAndNameFunc(String groupName,
                                                                                  String alertNameForRemoval) {
         return prometheusRule -> {
+            log.info("Rule before removal: {}", prometheusRule);
             log.info("Going to remove alert '{}' for user '{}'", alertNameForRemoval, groupName);
             var groups = prometheusRule.getSpec().getGroups();
             var groupIterator = groups.iterator();
@@ -54,10 +55,12 @@ public class PrometheusFunctionsUtil {
                             log.info("User '{}'has no more rules and will be removed!", group.getName());
                             groupIterator.remove();
                         }
+                        log.info("Rule after removal: {}", prometheusRule);
                         return prometheusRule;
                     }
                 }
             }
+            log.info("Nothing was removed: {}", prometheusRule);
             return prometheusRule;
         };
     }
