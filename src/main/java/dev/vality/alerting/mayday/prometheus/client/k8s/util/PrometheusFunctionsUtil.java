@@ -5,6 +5,7 @@ import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRule;
 import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRuleSpec;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.ObjectUtils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -69,8 +70,22 @@ public class PrometheusFunctionsUtil {
                 groups = new HashSet<>();
                 prometheusRule.getSpec().setGroups(groups);
             }
-            PrometheusRuleSpec.Group group = groups.stream().filter(g -> g.getName().equals(groupName)).findFirst()
-                    .orElse(createPrometheusRuleGroup(groupName));
+
+            var groupIterator = groups.iterator();
+            PrometheusRuleSpec.Group group = null;
+            while (groupIterator.hasNext()) {
+                var cursor = groupIterator.next();
+                log.info("Found group with name '{}'...", cursor.getName());
+                if (cursor.getName().equals(groupName)) {
+                    log.info("Found matching group with name '{}'! Group: {}", cursor.getName(), cursor);
+                    group = cursor;
+                    break;
+                }
+            }
+
+            if (ObjectUtils.isEmpty(group)) {
+                group = createPrometheusRuleGroup(groupName);
+            }
             groups.add(group);
             var rules = group.getRules();
             if (rules == null) {
