@@ -27,6 +27,7 @@ public class CreateAlertDtoToPrometheusRuleConverter implements Converter<Create
         PrometheusRuleSpec.Rule rule = new PrometheusRuleSpec.Rule();
         rule.setAlert(source.getAlertId());
         rule.setExpr(source.getPrometheusQuery());
+        rule.setDuration("1m");
         rule.setAnnotations(Map.of(PrometheusRuleAnnotation.ALERT_NAME, source.getUserFriendlyAlertName(),
                 PrometheusRuleAnnotation.ALERT_DESCRIPTION, source.getUserFriendlyAlertDescription()));
         Map<String, String> labels = new HashMap<>(k8sPrometheusRuleProperties.getAlertRule().getLabels());
