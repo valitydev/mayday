@@ -1,5 +1,6 @@
 package dev.vality.alerting.mayday.prometheus.client.k8s.util;
 
+import dev.vality.alerting.mayday.common.constant.PrometheusRuleLabel;
 import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRule;
 import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRuleSpec;
 import lombok.experimental.UtilityClass;
@@ -37,24 +38,23 @@ public class PrometheusFunctionsUtil {
             while (groupIterator.hasNext()) {
                 var group = groupIterator.next();
                 log.info("Found user '{}'...", group.getName());
-                if (group.getName().equals(groupName)) {
-                    log.info("User '{}' was found!", group.getName());
-                    Set<PrometheusRuleSpec.Rule> alertRules = group.getRules();
-                    var ruleIterator = alertRules.iterator();
-                    while (ruleIterator.hasNext()) {
-                        var rule = ruleIterator.next();
-                        log.info("Found rule '{}' for user '{}'...", rule.getAlert(), group.getName());
-                        if (rule.getAlert().equals(alertNameForRemoval)) {
-                            ruleIterator.remove();
-                            log.info("Rule '{}' for user '{}' will be removed!", rule.getAlert(), group.getName());
-                            break;
+                Set<PrometheusRuleSpec.Rule> alertRules = group.getRules();
+                var ruleIterator = alertRules.iterator();
+                while (ruleIterator.hasNext()) {
+                    var rule = ruleIterator.next();
+                    log.info("Found rule '{}' for user '{}'...", rule.getAlert(), group.getName());
+                    if (rule.getAlert().equals(alertNameForRemoval)
+                            && rule.getLabels().get(PrometheusRuleLabel.USERNAME).equals(groupName)) {
+
+                        ruleIterator.remove();
+                        log.info("Rule '{}' for user '{}' will be removed!", rule.getAlert(), group.getName());
+
+                        if (group.getRules().isEmpty()) {
+                            log.info("User '{}'has no more rules and will be removed!", group.getName());
+                            groupIterator.remove();
                         }
+                        return prometheusRule;
                     }
-                    if (group.getRules().isEmpty()) {
-                        log.info("User '{}'has no more rules and will be removed!", group.getName());
-                        groupIterator.remove();
-                    }
-                    break;
                 }
             }
             return prometheusRule;
