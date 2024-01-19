@@ -1,5 +1,6 @@
 package dev.vality.alerting.mayday.prometheus.client.k8s;
 
+import dev.vality.alerting.mayday.common.constant.PrometheusRuleLabel;
 import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRule;
 import dev.vality.alerting.mayday.prometheus.client.k8s.model.PrometheusRuleSpec;
 import dev.vality.alerting.mayday.prometheus.client.k8s.util.PrometheusFunctionsUtil;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -62,10 +64,11 @@ public class PrometheusClient {
             if (rule == null) {
                 return Set.of();
             }
-            var groupAlerts = rule.getSpec().getGroups().stream()
-                    .filter(group -> group.getName().equals(groupName))
-                    .findFirst().orElse(new PrometheusRuleSpec.Group()).getRules();
-            return groupAlerts == null ? Set.of() : groupAlerts;
+            return rule.getSpec().getGroups().stream()
+                    .flatMap(group -> group.getRules().stream()
+                            .filter(rule1 -> rule1.getLabels().containsKey(PrometheusRuleLabel.USERNAME)
+                            && rule1.getLabels().get(PrometheusRuleLabel.USERNAME).equals(groupName)))
+                    .collect(Collectors.toSet());
         }
     }
 
@@ -91,6 +94,7 @@ public class PrometheusClient {
                     prometheusRuleClient = client.resources(PrometheusRule.class);
             var rule =
                     prometheusRuleClient.inNamespace(client.getNamespace()).withName(ruleName).get();
+            log.info("Rule before modification: {}", rule);
             var resource = prometheusRuleClient.inNamespace(client.getNamespace()).resource(rule);
             var response = resource.edit(modifyFunc);
             log.info("Rule after modification: {}", response);
