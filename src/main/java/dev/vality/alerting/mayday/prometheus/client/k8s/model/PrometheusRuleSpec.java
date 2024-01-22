@@ -4,21 +4,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Data
 public class PrometheusRuleSpec {
 
-    private Set<Group> groups = new HashSet<>();
+    private List<Group> groups;
 
     @Data
     @NoArgsConstructor
     public static class Group {
         private String name;
-        private String duration;
-        private Set<Rule> rules;
+        private String interval;
+        private List<Rule> rules;
         @JsonProperty("partial_response_strategy")
         private String partialResponseStrategy;
         private Integer limit;

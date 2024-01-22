@@ -7,8 +7,8 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ObjectUtils;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 @Slf4j
@@ -18,14 +18,13 @@ public class PrometheusFunctionsUtil {
     public static UnaryOperator<PrometheusRule> getRemoveGroupByNameFunc(String groupName) {
         return prometheusRule -> {
             var groups = prometheusRule.getSpec().getGroups();
-            var groupIterator = groups.iterator();
-            while (groupIterator.hasNext()) {
-                var group = groupIterator.next();
-                if (group.getName().equals(groupName)) {
-                    groupIterator.remove();
-                    break;
-                }
+
+            if (ObjectUtils.isEmpty(groups)) {
+                log.info("Groups are empty. No action required.");
+                return prometheusRule;
             }
+
+            groups.removeIf(group -> group.getName().equals(groupName));
             return prometheusRule;
         };
     }
@@ -36,11 +35,17 @@ public class PrometheusFunctionsUtil {
             log.info("Rule before removal: {}", prometheusRule);
             log.info("Going to remove alert '{}' for user '{}'", alertNameForRemoval, groupName);
             var groups = prometheusRule.getSpec().getGroups();
+
+            if (ObjectUtils.isEmpty(groups)) {
+                log.info("Groups are empty. No action required.");
+                return prometheusRule;
+            }
+
             var groupIterator = groups.iterator();
             while (groupIterator.hasNext()) {
                 var group = groupIterator.next();
                 log.info("Found user '{}'...", group.getName());
-                Set<PrometheusRuleSpec.Rule> alertRules = group.getRules();
+                List<PrometheusRuleSpec.Rule> alertRules = group.getRules();
                 var ruleIterator = alertRules.iterator();
                 while (ruleIterator.hasNext()) {
                     var rule = ruleIterator.next();
@@ -56,7 +61,6 @@ public class PrometheusFunctionsUtil {
                             groupIterator.remove();
                         }
                         log.info("Rule after removal: {}", prometheusRule);
-                        return prometheusRule;
                     }
                 }
             }
@@ -69,8 +73,8 @@ public class PrometheusFunctionsUtil {
                                                                        PrometheusRuleSpec.Rule alert) {
         return prometheusRule -> {
             var groups = prometheusRule.getSpec().getGroups();
-            if (groups == null) {
-                groups = new HashSet<>();
+            if (ObjectUtils.isEmpty(groups)) {
+                groups = new ArrayList<>();
                 prometheusRule.getSpec().setGroups(groups);
             }
 
@@ -92,7 +96,7 @@ public class PrometheusFunctionsUtil {
             groups.add(group);
             var rules = group.getRules();
             if (rules == null) {
-                rules = new HashSet<>();
+                rules = new ArrayList<>();
                 group.setRules(rules);
             }
             log.info("Adding alert '{}' to group '{}'", alert, group);
@@ -105,7 +109,7 @@ public class PrometheusFunctionsUtil {
         log.info("Creating group with name '{}'", groupName);
         var group = new PrometheusRuleSpec.Group();
         group.setName(groupName);
-        group.setRules(new HashSet<>());
+        group.setRules(new ArrayList<>());
         return group;
     }
 
