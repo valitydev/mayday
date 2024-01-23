@@ -50,6 +50,7 @@ alertmanager:
   webhook:
     url: http://localhost:8022
     path: /alertmanager/webhook
+    send-resolved: true
   receiver:
     telegram-bot:
       url: http://telegram:1234/endp

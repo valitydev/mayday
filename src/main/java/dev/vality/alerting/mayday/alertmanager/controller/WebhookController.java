@@ -1,5 +1,7 @@
 package dev.vality.alerting.mayday.alertmanager.controller;
 
+import dev.vality.alerting.mayday.alertmanager.config.properties.AlertmanagerWebhookProperties;
+import dev.vality.alerting.mayday.alertmanager.constant.WebhookStatus;
 import dev.vality.alerting.mayday.alertmanager.model.Webhook;
 import dev.vality.alerting.mayday.alertmanager.service.AlertmanagerService;
 import dev.vality.alerting.mayday.common.constant.PrometheusRuleLabel;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class WebhookController {
 
+    private final AlertmanagerWebhookProperties alertmanagerWebhookProperties;
     private final NotifierServiceSrv.Iface telegramBotClient;
     private final Converter<Webhook.Alert, Notification> webhookAlertToNotificationConverter;
     private final AlertmanagerService alertmanagerService;
@@ -36,7 +39,8 @@ public class WebhookController {
                 String alertName = alert.getLabels().get(PrometheusRuleLabel.ALERT_NAME);
                 // Алертменеджер может прислать нотификацию уже после того, как пользователь удалил алерт, т.к
                 // обновления в конфигурации применяются не моментально. Поэтому нужна доп.фильтрация здесь.
-                if (alertmanagerService.containsUserRoute(userId, alertName)) {
+                if (isResolvedNotificationPermitted(webhook)
+                        && alertmanagerService.containsUserRoute(userId, alertName)) {
                     var notification = webhookAlertToNotificationConverter.convert(alert);
                     telegramBotClient.notify(notification);
                     log.info("Alertmanager webhook processed successfully: {}", webhook);
@@ -49,5 +53,10 @@ public class WebhookController {
             }
         }
         return ResponseEntity.ok().build();
+    }
+
+    private boolean isResolvedNotificationPermitted(Webhook webhook) {
+        return WebhookStatus.FIRING.equals(webhook.getStatus())
+                || alertmanagerWebhookProperties.getSendResolved();
     }
 }
