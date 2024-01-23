@@ -59,12 +59,12 @@ public class PrometheusFunctionsUtil {
                         if (group.getRules().isEmpty()) {
                             log.info("User '{}'has no more rules and will be removed!", group.getName());
                             groupIterator.remove();
+                            break;
                         }
-                        log.info("Rule after removal: {}", prometheusRule);
                     }
                 }
             }
-            log.info("Nothing was removed: {}", prometheusRule);
+            log.info("Rule after removal: {}", prometheusRule);
             return prometheusRule;
         };
     }
@@ -92,14 +92,20 @@ public class PrometheusFunctionsUtil {
 
             if (ObjectUtils.isEmpty(group)) {
                 group = createPrometheusRuleGroup(groupName);
+                groups.add(group);
             }
-            groups.add(group);
             var rules = group.getRules();
             if (rules == null) {
                 rules = new ArrayList<>();
                 group.setRules(rules);
             }
             log.info("Adding alert '{}' to group '{}'", alert, group);
+            for (var rule : rules) {
+                if (rule.getAlert().equals(alert.getAlert())) {
+                    log.info("Alert '{}' already exists and won't be added", rule);
+                    return prometheusRule;
+                }
+            }
             rules.add(alert);
             return prometheusRule;
         };
