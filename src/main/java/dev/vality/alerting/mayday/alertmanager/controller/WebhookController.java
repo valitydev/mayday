@@ -11,7 +11,6 @@ import dev.vality.alerting.tg_bot.NotifierServiceSrv;
 import dev.vality.alerting.tg_bot.ReceiverNotFound;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.thrift.TException;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.MediaType;
@@ -47,7 +46,7 @@ public class WebhookController {
                     String alertName = alert.getLabels().get(PrometheusRuleLabel.ALERT_NAME);
                     // Алертменеджер может прислать нотификацию уже после того, как пользователь удалил алерт, т.к
                     // обновления в конфигурации применяются не моментально. Поэтому нужна доп.фильтрация здесь.
-                    if (isResolvedNotificationPermitted(webhook)
+                    if (isResolvedNotificationPermitted(alert)
                             && alertmanagerService.containsUserRoute(userId, alertName)) {
                         var notification = webhookAlertToNotificationConverter.convert(alert);
                         telegramBotClient.notify(notification);
@@ -67,8 +66,8 @@ public class WebhookController {
         return ResponseEntity.ok().build();
     }
 
-    private boolean isResolvedNotificationPermitted(Webhook webhook) {
-        return WebhookStatus.FIRING.equals(webhook.getStatus())
+    private boolean isResolvedNotificationPermitted(Webhook.Alert alert) {
+        return WebhookStatus.FIRING.equals(alert.getStatus())
                 || alertmanagerWebhookProperties.getSendResolved();
     }
 }
