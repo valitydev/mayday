@@ -17,4 +17,5 @@ public class AlertmanagerWebhookProperties {
     @NotNull
     private String url;
     private String path;
+    private Boolean sendResolved = true;
 }
