@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>mayday</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>mayday</name>
@@ -30,8 +30,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>2022.0.3</version>
-				<type>pom</type>
+				<version>2022.0.3<2022.0.5</type>
 				<scope>import</scope>
 			</dependency>
 		</dependencies>
@@ -101,7 +100,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.11.0</version>
+			<version>2.11.0</v2.15.1
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -163,12 +162,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-remote-resources-plugin</artifactId>
-				<version>3.0.0</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.shared</groupId>
+				<version>3.0.0</ve3.2.0</groupId>
 						<artifactId>maven-filtering</artifactId>
-						<version>3.3.0</version>
+						<version>3.3.2</version>
 					</dependency>
 				</dependencies>
 				<configuration>
