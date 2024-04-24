@@ -15,7 +15,7 @@ public class DawayObjectUtil {
         return List.of(
                 Provider.builder()
                         .id(1)
-                        .name("test").build()
+                        .name("provider").build()
         );
     }
 
@@ -23,7 +23,7 @@ public class DawayObjectUtil {
         return List.of(
                 Terminal.builder()
                         .id(1)
-                        .name("test").build()
+                        .name("terminal").build()
         );
     }
 
@@ -31,7 +31,7 @@ public class DawayObjectUtil {
         return List.of(
                 Shop.builder()
                         .id("def91399-75ff-4307-8634-626c85859ea4")
-                        .name("test").build()
+                        .name("shop").build()
         );
     }
 
