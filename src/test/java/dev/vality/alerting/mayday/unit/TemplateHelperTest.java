@@ -50,9 +50,9 @@ public class TemplateHelperTest {
             "status=\"captured\"}) / sum(ebm_payments_status_count{provider_id=~\"1\",terminal_id=~\"1\"," +
             "shop_id=~\"def91399-75ff-4307-8634-626c85859ea4\",currency=~\"RUB\",duration=\"15m\"}), 1) > 10";
 
-    private static final String userFriendlyAlertName = "Конверсия платежей по провайдеру 'provider (1)', " +
-            "терминалу 'terminal (1)', валюте 'RUB' и магазину 'shop (def91399-75ff-4307-8634-626c85859ea4)' " +
-            "за период: 15m > 10%";
+    private static final String userFriendlyAlertName = "Конверсия платежей по провайдеру '(1) provider', " +
+            "терминалу '(1) terminal', валюте '(RUB) Рублик' и магазину " +
+            "'(def91399-75ff-4307-8634-626c85859ea4) shop' за период: 15m > 10%";
 
     @Test
     void preparePrometheusRuleDataTest() throws TException {

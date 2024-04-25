@@ -67,42 +67,27 @@ public class DictionaryService {
     }
 
     private Map<String, DictionaryData> convertTerminalsToDictionary(List<Terminal> terminals) {
-        return terminals.stream().collect(Collectors.toMap(
-                terminal -> formatDictionaryKey(Integer.toString(terminal.getId()), terminal.getName()),
-                terminal -> DictionaryData.builder()
-                        .value(Integer.toString(terminal.getId()))
-                        .userFriendlyValue(formatDictionaryValue(terminal.getId(), terminal.getName()))
-                        .build()
-        ));
+        return terminals.stream()
+                .map(terminal -> createDictionaryData(terminal.getId(), terminal.getName()))
+                .collect(Collectors.toMap(DictionaryData::getUserFriendlyValue, dictionaryData -> dictionaryData));
     }
 
     private Map<String, DictionaryData> convertProvidersToDictionary(List<Provider> providers) {
-        return providers.stream().collect(Collectors.toMap(
-                provider -> formatDictionaryKey(Integer.toString(provider.getId()), provider.getName()),
-                provider -> DictionaryData.builder()
-                        .value(Integer.toString(provider.getId()))
-                        .userFriendlyValue(formatDictionaryValue(provider.getId(), provider.getName()))
-                        .build()
-        ));
+        return providers.stream()
+                .map(provider -> createDictionaryData(provider.getId(), provider.getName()))
+                .collect(Collectors.toMap(DictionaryData::getUserFriendlyValue, dictionaryData -> dictionaryData));
     }
 
     private Map<String, DictionaryData> convertWalletsToDictionary(List<Wallet> wallets) {
-        return wallets.stream().collect(Collectors.toMap(
-                wallet -> formatDictionaryKey(wallet.getId(), wallet.getName()),
-                wallet -> DictionaryData.builder()
-                        .value(wallet.getId())
-                        .userFriendlyValue(formatDictionaryValue(wallet.getId(), wallet.getName()))
-                        .build()
-        ));
+        return wallets.stream()
+                .map(wallet -> createDictionaryData(wallet.getId(), wallet.getName()))
+                .collect(Collectors.toMap(DictionaryData::getUserFriendlyValue, dictionaryData -> dictionaryData));
     }
 
     private Map<String, DictionaryData> convertShopsToDictionary(List<Shop> shops) {
         return shops.stream().collect(Collectors.toMap(
-                shop -> formatDictionaryKey(formatShopId(shop.getId()), shop.getName()),
-                wallet -> DictionaryData.builder()
-                        .value(wallet.getId())
-                        .userFriendlyValue(formatDictionaryValue(wallet.getId(), wallet.getName()))
-                        .build()
+                shop -> formatDictionaryString(formatShopId(shop.getId()), shop.getName()),
+                shop -> createDictionaryData(shop.getId(), shop.getName())
         ));
     }
 
@@ -118,22 +103,24 @@ public class DictionaryService {
     }
 
     private Map<String, DictionaryData> convertCurrenciesToDictionary(List<Currency> currencies) {
-        return currencies.stream().collect(Collectors.toMap(
-                currency -> formatDictionaryKey(currency.getSymbolicCode(), currency.getName()),
-                currency -> new DictionaryData(currency.getSymbolicCode())
-        ));
+        return currencies.stream()
+                .map(currency -> createDictionaryData(currency.getSymbolicCode(), currency.getName()))
+                .collect(Collectors.toMap(DictionaryData::getUserFriendlyValue, dictionaryData -> dictionaryData));
     }
 
-    private String formatDictionaryKey(String id, String description) {
+    private String formatDictionaryString(String id, String description) {
         return String.format("(%s) %s", id, description);
     }
 
-    private String formatDictionaryValue(String id, String description) {
-        return String.format("%s (%s)", description, id);
+    private DictionaryData createDictionaryData(String id, String description) {
+        return DictionaryData.builder()
+                .value(id)
+                .userFriendlyValue(formatDictionaryString(id, description))
+                .build();
     }
 
-    private String formatDictionaryValue(Integer id, String description) {
-        return String.format("%s (%d)", description, id);
+    private DictionaryData createDictionaryData(Integer id, String description) {
+        return createDictionaryData(Integer.toString(id), description);
     }
 
 }

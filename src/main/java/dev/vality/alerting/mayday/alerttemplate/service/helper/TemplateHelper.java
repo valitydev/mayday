@@ -145,9 +145,9 @@ public class TemplateHelper {
         String preparedTemplate = template;
         var replacementsEntries = replacements.entrySet();
         for (Map.Entry<String, List<DictionaryData>> entry : replacementsEntries) {
-            var entryValue = entry.getValue().stream().map(DictionaryData::getValue).toList();
-            String value = entry.getValue().size() == 1
-                    ? entry.getValue().get(0).getValue() : String.join(multiValuePrometheusDelimiter, entryValue);
+            var value = entry.getValue().stream()
+                    .map(DictionaryData::getValue)
+                    .collect(Collectors.joining(multiValuePrometheusDelimiter));
             preparedTemplate = preparedTemplate.replace(formatReplacementVariable(entry.getKey()), value);
         }
         return preparedTemplate;
@@ -157,13 +157,10 @@ public class TemplateHelper {
         String preparedTemplate = template;
         var replacementsEntries = replacements.entrySet();
         for (Map.Entry<String, List<DictionaryData>> entry : replacementsEntries) {
-            var entryValue = entry.getValue().stream().map(DictionaryData::getUserFriendlyValue).toList();
-            String value;
-            if (entry.getValue().size() == 1) {
-                value = formatAnyValue(entry.getValue().get(0).getUserFriendlyValue());
-            } else {
-                value = String.join(multiValueUserFriendlyDelimiter, entryValue);
-            }
+            var value = entry.getValue().stream()
+                    .map(DictionaryData::getUserFriendlyValue)
+                    .map(this::formatAnyValue)
+                    .collect(Collectors.joining(multiValueUserFriendlyDelimiter));
             preparedTemplate = preparedTemplate.replace(formatReplacementVariable(entry.getKey()), value);
         }
         return preparedTemplate;
