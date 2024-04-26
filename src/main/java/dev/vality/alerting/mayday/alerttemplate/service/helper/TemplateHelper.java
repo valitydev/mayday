@@ -4,6 +4,7 @@ import dev.vality.alerting.mayday.CreateAlertRequest;
 import dev.vality.alerting.mayday.ParameterInfo;
 import dev.vality.alerting.mayday.alerttemplate.error.AlertConfigurationException;
 import dev.vality.alerting.mayday.alerttemplate.model.alerttemplate.AlertTemplate;
+import dev.vality.alerting.mayday.alerttemplate.model.dictionary.DictionaryData;
 import dev.vality.alerting.mayday.alerttemplate.service.DictionaryService;
 import dev.vality.alerting.mayday.common.constant.AlertConfigurationRequiredParameter;
 import dev.vality.alerting.mayday.common.dto.CreateAlertDto;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -25,7 +27,7 @@ import java.util.stream.Collectors;
 public class TemplateHelper {
 
     private static final String anyClientValue = "-";
-    private static final String anyPrometheusValue = ".*";
+    private static final DictionaryData anyPrometheusValue = new DictionaryData(".*");
     private static final String anyUserFriendlyValue = "<любое значение>";
     private static final String multiValuePrometheusDelimiter = "|";
     private static final String multiValueUserFriendlyDelimiter = ",";
@@ -37,7 +39,7 @@ public class TemplateHelper {
                                                     List<AlertTemplate.AlertConfigurationParameter>
                                                             metricParams) {
 
-        Map<String, List<String>> parameters = mergeParameters(createAlertRequest.getParameters(), metricParams);
+        var parameters = mergeParameters(createAlertRequest.getParameters(), metricParams);
         String queryExpression = prepareMetricExpression(metricTemplate, parameters);
         log.debug("Prepared prometheus expression: {}", queryExpression);
         String alertId = generateAlertId(createAlertRequest, queryExpression);
@@ -52,10 +54,10 @@ public class TemplateHelper {
                 .build();
     }
 
-    protected Map<String, List<String>> mergeParameters(List<ParameterInfo> externalParamsInfo,
-                                                        List<AlertTemplate.AlertConfigurationParameter>
-                                                                maydayParamsInfo) {
-        Map<String, List<String>> params = maydayParamsInfo.stream()
+    protected Map<String, List<DictionaryData>> mergeParameters(List<ParameterInfo> externalParamsInfo,
+                                                                List<AlertTemplate.AlertConfigurationParameter>
+                                                                        maydayParamsInfo) {
+        Map<String, List<DictionaryData>> params = maydayParamsInfo.stream()
                 .map(maydayParamInfo -> {
                             var externalParamInfos = externalParamsInfo.stream()
                                     .filter(userParamInfo ->
@@ -65,7 +67,7 @@ public class TemplateHelper {
                             validateMultipleValues(maydayParamInfo, externalParamInfos);
                             validateMandatoryValues(maydayParamInfo, externalParamInfos);
 
-                            List<String> values = new ArrayList<>();
+                            List<DictionaryData> values = new ArrayList<>();
                             if (!maydayParamInfo.getMandatory() && externalParamInfos.size() == 1) {
                                 values.add(hasNoValue(externalParamInfos.get(0)) ? anyPrometheusValue :
                                         getParameterValue(maydayParamInfo, externalParamInfos.get(0)));
@@ -86,14 +88,16 @@ public class TemplateHelper {
         Arrays.stream(AlertConfigurationRequiredParameter.values()).forEach(
                 requiredParameter -> {
                     var param = getRequiredParameter(String.valueOf(requiredParameter.getId()), externalParamsInfo);
-                    params.put(requiredParameter.getSubstitutionName(), List.of(param.getValue()));
+                    params.put(requiredParameter.getSubstitutionName(),
+                            Stream.of(param.getValue()).map(DictionaryData::new).toList()
+                    );
                 }
         );
         return params;
     }
 
     private void validateMultipleValues(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
-                                               List<ParameterInfo> externalParamInfos) {
+                                        List<ParameterInfo> externalParamInfos) {
         if (externalParamInfos.size() > 1 && !maydayParamInfo.getMultipleValues()) {
             throw new AlertConfigurationException(String.format("Parameter '%s' cannot have " +
                     "multiple values!", maydayParamInfo.getSubstitutionName()));
@@ -122,54 +126,59 @@ public class TemplateHelper {
                 .getBytes(StandardCharsets.UTF_8));
     }
 
-    protected String prepareMetricExpression(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
+    protected String prepareMetricExpression(AlertTemplate metricTemplate,
+                                             Map<String, List<DictionaryData>> parameters) {
         return prepareTemplate(metricTemplate.getPrometheusQuery(), parameters);
     }
 
-    protected String prepareUserFriendlyAlertName(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
+    protected String prepareUserFriendlyAlertName(AlertTemplate metricTemplate,
+                                                  Map<String, List<DictionaryData>> parameters) {
         return prepareUserFriendlyTemplate(metricTemplate.getAlertNameTemplate(), parameters);
     }
 
-    protected String prepareMetricAlertMessage(AlertTemplate metricTemplate, Map<String, List<String>> parameters) {
+    protected String prepareMetricAlertMessage(AlertTemplate metricTemplate,
+                                               Map<String, List<DictionaryData>> parameters) {
         return prepareUserFriendlyTemplate(metricTemplate.getAlertNotificationTemplate(), parameters);
     }
 
-    private String prepareTemplate(String template, Map<String, List<String>> replacements) {
+    private String prepareTemplate(String template, Map<String, List<DictionaryData>> replacements) {
         String preparedTemplate = template;
         var replacementsEntries = replacements.entrySet();
-        for (Map.Entry<String, List<String>> entry : replacementsEntries) {
-            String value = entry.getValue().size() == 1
-                    ? entry.getValue().get(0) : String.join(multiValuePrometheusDelimiter, entry.getValue());
+        for (Map.Entry<String, List<DictionaryData>> entry : replacementsEntries) {
+            var value = entry.getValue().stream()
+                    .map(DictionaryData::getValue)
+                    .collect(Collectors.joining(multiValuePrometheusDelimiter));
             preparedTemplate = preparedTemplate.replace(formatReplacementVariable(entry.getKey()), value);
         }
         return preparedTemplate;
     }
 
-    private String prepareUserFriendlyTemplate(String template, Map<String, List<String>> replacements) {
+    private String prepareUserFriendlyTemplate(String template, Map<String, List<DictionaryData>> replacements) {
         String preparedTemplate = template;
         var replacementsEntries = replacements.entrySet();
-        for (Map.Entry<String, List<String>> entry : replacementsEntries) {
-            String value = entry.getValue().size() == 1
-                    ? formatAnyValue(entry.getValue().get(0)) : String.join(multiValueUserFriendlyDelimiter,
-                    entry.getValue());
+        for (Map.Entry<String, List<DictionaryData>> entry : replacementsEntries) {
+            var value = entry.getValue().stream()
+                    .map(DictionaryData::getUserFriendlyValue)
+                    .map(this::formatAnyValue)
+                    .collect(Collectors.joining(multiValueUserFriendlyDelimiter));
             preparedTemplate = preparedTemplate.replace(formatReplacementVariable(entry.getKey()), value);
         }
         return preparedTemplate;
     }
 
     private String formatAnyValue(String value) {
-        if (anyPrometheusValue.equals(value)) {
+        if (anyPrometheusValue.getValue().equals(value)) {
             return anyUserFriendlyValue;
         }
         return value;
     }
 
-    private String getParameterValue(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
-                                     ParameterInfo userParamInfo) {
+    private DictionaryData getParameterValue(AlertTemplate.AlertConfigurationParameter maydayParamInfo,
+                                             ParameterInfo userParamInfo) {
         if (maydayParamInfo.getDictionaryName() != null) {
             return dictionaryService.getDictionary(maydayParamInfo.getDictionaryName()).get(userParamInfo.getValue());
         }
-        return userParamInfo.getValue();
+        return new DictionaryData(userParamInfo.getValue());
     }
 
     private String formatReplacementVariable(String variableName) {

@@ -1,5 +1,6 @@
 package dev.vality.alerting.mayday.common.dto;
 
+import dev.vality.alerting.mayday.alerttemplate.model.dictionary.DictionaryData;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,5 +15,5 @@ public class CreateAlertDto {
     private String prometheusQuery;
     private String userFriendlyAlertName;
     private String userFriendlyAlertDescription;
-    private Map<String, List<String>> parameters;
+    private Map<String, List<DictionaryData>> parameters;
 }

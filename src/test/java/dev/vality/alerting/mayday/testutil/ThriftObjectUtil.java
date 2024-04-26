@@ -20,17 +20,17 @@ public class ThriftObjectUtil {
 
         var providerParameter = new ParameterInfo();
         providerParameter.setId("1");
-        providerParameter.setValue("(1) test");
+        providerParameter.setValue("(1) provider");
         parameters.add(providerParameter);
 
         var terminalParameter = new ParameterInfo();
         terminalParameter.setId("2");
-        terminalParameter.setValue("(1) test");
+        terminalParameter.setValue("(1) terminal");
         parameters.add(terminalParameter);
 
         var shopParameter = new ParameterInfo();
         shopParameter.setId("3");
-        shopParameter.setValue("(def91399) test");
+        shopParameter.setValue("(def91399) shop");
         parameters.add(shopParameter);
 
         var currencyParameter = new ParameterInfo();

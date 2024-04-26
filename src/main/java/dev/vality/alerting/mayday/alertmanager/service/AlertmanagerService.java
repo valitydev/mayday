@@ -68,7 +68,8 @@ public class AlertmanagerService {
         route.setGroupWait(ONE_SEC_WAIT);
         String repeatInterval = FormatUtil.formatMinutesDuration(createAlertDto.getParameters()
                 .get(String.valueOf(
-                        AlertConfigurationRequiredParameter.ALERT_REPEAT_MINUTES.getSubstitutionName())).get(0));
+                        AlertConfigurationRequiredParameter.ALERT_REPEAT_MINUTES.getSubstitutionName())).get(0)
+                .getValue());
         route.setGroupInterval(repeatInterval);
         var alertnameMatcher =
                 AlertmanagerFunctionsUtil.createMatcher(PrometheusRuleLabel.ALERT_NAME, createAlertDto.getAlertId());
