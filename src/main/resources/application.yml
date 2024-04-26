@@ -53,7 +53,7 @@ alertmanager:
     send-resolved: true
   receiver:
     telegram-bot:
-      url: http://telegram:1234/endp
+      url: http://telegram:1234/endpoint
 
 
 testcontainers:
