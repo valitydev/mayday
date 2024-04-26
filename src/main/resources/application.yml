@@ -40,7 +40,7 @@ k8s:
       release: prometheus
     alert-rule:
       labels:
-        # Лейбл с неймспейсом необходим, поскольку алертменеджер по умолчанию начинает фильтровать по нему.
+        # Лейбл с неймспейсом необходим, поскольку алертменеджер по дефолту начинает фильтровать по нему.
         # Тут описано более подробно: https://github.com/prometheus-operator/prometheus-operator/discussions/3733
         namespace: default
   alertmanager-configuration:
