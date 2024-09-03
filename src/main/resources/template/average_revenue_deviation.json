@@ -1,9 +1,9 @@
 {
   "id": "average_revenue_deviation",
   "readable_name": "Отклонение среднего оборота",
-  "prometheus_query": "(sum_over_time(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\",currency=~\"${currency}\",duration=\"${aggr_period}\"}) OR on() vector(0)) / scalar(10^ebm_currency_exponent{symbolic_code=~\"${currency}\"}) / (avg_over_time(sum_over_time(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\",currency=~\"${currency}\"}[${aggr_period}])[30d:]) OR on() vector(0)) * 100 > ${threshold_factor}",
-  "alert_name_template": "Отклонение среднего оборота для провайдера '${provider_id}', терминала '${terminal_id}' и магазина '${shop_id}' с валютой '${currency}' за период: ${aggr_period} > среднего за последние 30 дней",
-  "alert_notification_template": "Оборот за период '${aggr_period}' по провайдеру '${provider_id}', терминалу '${terminal_id}' и магазину '${shop_id}' с валютой '${currency}' превышает средний оборот за последние 30 дней на ${threshold_factor} процентов. Текущее значение: {{printf \"%.f\" $value }}",
+  "prometheus_query": "(sum(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\",currency=~\"${currency}\",duration=\"${aggr_period}\"}) OR on() vector(0))) / (avg_over_time(sum(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\",currency=~\"${currency}\"})[30d:]) OR on() vector(0)) * 100 > ${threshold_factor}",
+  "alert_name_template": "Оборот для провайдера '${provider_id}', терминала '${terminal_id}' и магазина '${shop_id}' с валютой '${currency}' за период ${aggr_period} превышает ${threshold_factor} процентов среднего оборота за последние 30 дней",
+  "alert_notification_template": "Оборот для провайдера '${provider_id}', терминала '${terminal_id}' и магазина '${shop_id}' с валютой '${currency}' за период ${aggr_period} превышает ${threshold_factor} процентов среднего оборота за последние 30 дней. Текущее значение: {{printf \"%.f\" $value }}",
   "parameters": [
     {
       "id": 1,
