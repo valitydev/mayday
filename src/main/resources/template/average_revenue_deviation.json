@@ -1,0 +1,55 @@
+{
+  "id": "average_revenue_deviation",
+  "readable_name": "Отклонение среднего оборота",
+  "prometheus_query": "(sum(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\",currency=~\"${currency}\",duration=\"${aggr_period}\"}) OR on() vector(0)) / (avg_over_time(sum(ebm_payments_amount{provider_id=~\"${provider_id}\",shop_id=~\"${shop_id}\",status=\"captured\",terminal_id=~\"${terminal_id}\",currency=~\"${currency}\"})[30d:]) OR on() vector(0)) * 100 > ${threshold_factor}",
+  "alert_name_template": "Оборот для провайдера '${provider_id}', терминала '${terminal_id}' и магазина '${shop_id}' с валютой '${currency}' за период ${aggr_period} превышает ${threshold_factor} процентов среднего оборота за последние 30 дней",
+  "alert_notification_template": "Оборот для провайдера '${provider_id}', терминала '${terminal_id}' и магазина '${shop_id}' с валютой '${currency}' за период ${aggr_period} превышает ${threshold_factor} процентов среднего оборота за последние 30 дней. Текущее значение: {{printf \"%.f\" $value }}",
+  "parameters": [
+    {
+      "id": 1,
+      "substitution_name": "provider_id",
+      "readable_name": "Введите идентификатор провайдера (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "payment_providers"
+    },
+    {
+      "id": 2,
+      "substitution_name": "terminal_id",
+      "readable_name": "Введите идентификатор терминала (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "payment_terminals"
+    },
+    {
+      "id": 3,
+      "substitution_name": "shop_id",
+      "readable_name": "Введите идентификатор магазина (опционально)",
+      "mandatory": false,
+      "multiple_values": true,
+      "dictionary_name": "shops"
+    },
+    {
+      "id": 4,
+      "substitution_name": "currency",
+      "readable_name": "Введите код валюты (опционально)",
+      "mandatory": false,
+      "multiple_values": false,
+      "dictionary_name": "currencies"
+    },
+    {
+      "id": 5,
+      "substitution_name": "aggr_period",
+      "readable_name": "Укажите период, за который необходимо считать сумму по всем успешным платежам",
+      "mandatory": true,
+      "dictionary_name": "aggregation_intervals"
+    },
+    {
+      "id": 6,
+      "substitution_name": "threshold_factor",
+      "readable_name": "Введите пороговое значение в процентах (например, 150 для 150%)",
+      "mandatory": true,
+      "regexp": "^\\d+$"
+    }
+  ]
+}
