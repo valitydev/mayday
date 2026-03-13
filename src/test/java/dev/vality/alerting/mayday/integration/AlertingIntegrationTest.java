@@ -15,14 +15,14 @@ import dev.vality.alerting.mayday.prometheus.service.PrometheusService;
 import dev.vality.alerting.mayday.testutil.DawayObjectUtil;
 import dev.vality.alerting.mayday.testutil.K8sObjectUtil;
 import dev.vality.alerting.mayday.testutil.ThriftObjectUtil;
-import dev.vality.testcontainers.annotations.DefaultSpringBootTest;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +32,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@DefaultSpringBootTest
+@SpringBootTest
 public class AlertingIntegrationTest {
 
     @Autowired
@@ -42,11 +42,11 @@ public class AlertingIntegrationTest {
     @Autowired
     private AlertmanagerService alertmanagerService;
 
-    @MockBean
+    @MockitoBean
     private PrometheusClient prometheusClient;
-    @MockBean
+    @MockitoBean
     private AlertmanagerClient alertmanagerClient;
-    @MockBean
+    @MockitoBean
     private DawayDao dawayDao;
 
     private AutoCloseable mocks;
