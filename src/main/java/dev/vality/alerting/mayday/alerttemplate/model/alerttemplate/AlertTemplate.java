@@ -3,7 +3,7 @@ package dev.vality.alerting.mayday.alerttemplate.model.alerttemplate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @Data

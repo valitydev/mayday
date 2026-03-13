@@ -11,11 +11,11 @@ import dev.vality.alerting.mayday.alerttemplate.service.TemplateService;
 import dev.vality.alerting.mayday.alerttemplate.service.helper.TemplateHelper;
 import dev.vality.alerting.mayday.testutil.DawayObjectUtil;
 import dev.vality.alerting.mayday.testutil.ThriftObjectUtil;
-import dev.vality.testcontainers.annotations.DefaultSpringBootTest;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-@DefaultSpringBootTest
+@SpringBootTest
 public class TemplateHelperTest {
 
     @Autowired
@@ -39,9 +39,9 @@ public class TemplateHelperTest {
     @Autowired
     private TemplateService templateService;
 
-    @MockBean
+    @MockitoBean
     private AlertmanagerClient alertmanagerClient;
-    @MockBean
+    @MockitoBean
     private DawayDao dawayDao;
 
 
