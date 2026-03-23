@@ -1,6 +1,5 @@
 package dev.vality.alerting.mayday.unit;
 
-import dev.vality.alerting.mayday.Alert;
 import dev.vality.alerting.mayday.AlertConfiguration;
 import dev.vality.alerting.mayday.AlertingServiceSrv;
 import dev.vality.alerting.mayday.alertmanager.client.k8s.AlertmanagerClient;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -78,11 +76,9 @@ public class TemplateHelperTest {
 
 
     AlertConfiguration getPaymentConversionAlertConfiguration() throws TException {
-        List<Alert> alertList = thriftEndpoint.getSupportedAlerts();
-        return
-                thriftEndpoint.getAlertConfiguration(alertList.stream()
-                        .filter(alert -> alert.getId().equals("payment_conversion"))
-                        .findFirst()
-                        .orElseThrow().getId());
+        return thriftEndpoint.getAlertConfigurationsList().stream()
+                .filter(alert -> alert.getId().equals("payment_conversion"))
+                .findFirst()
+                .orElseThrow();
     }
 }

@@ -27,28 +27,22 @@ public class AlertingService implements AlertingServiceSrv.Iface {
 
     private final TemplateHelper templateHelper;
 
-    private final Converter<AlertTemplate, Alert> alertTemplateAlertConverter;
     private final Converter<List<AlertTemplate.AlertConfigurationParameter>, AlertConfiguration>
             alertParamsToAlertConfiguration;
 
     @Override
-    public void deleteAllAlerts(String userId) {
-        log.info("Removing all alerts for user '{}'", userId);
-        alertmanagerService.deleteUserRoutes(userId);
-        prometheusService.deleteAllUserAlerts(userId);
-        log.info("Removed all alerts for user '{}'", userId);
+    public void deleteAlert(DeleteAlertRequest deleteAlertRequest) throws AlertNotFound {
+        String userAlertId = deleteAlertRequest.getUserAlertId();
+        String userId = deleteAlertRequest.getUserId();
+        log.info("Removing alert '{}' for user '{}'", userAlertId, userId);
+        alertmanagerService.deleteUserRoute(userAlertId);
+        prometheusService.deleteUserAlert(userId, userAlertId);
+        log.info("Removed alert '{}' for user '{}'", userAlertId, userId);
     }
 
     @Override
-    public void deleteAlert(String userId, String alertId) {
-        log.info("Removing alert '{}' for user '{}'", alertId, userId);
-        alertmanagerService.deleteUserRoute(alertId);
-        prometheusService.deleteUserAlert(userId, alertId);
-        log.info("Removed alert '{}' for user '{}'", alertId, userId);
-    }
-
-    @Override
-    public List<UserAlert> getUserAlerts(String userId) {
+    public List<UserAlert> getUserAlerts(GetUserAlertsRequest getUserAlertsRequest) throws UserNotFound {
+        String userId = getUserAlertsRequest.getUserId();
         log.info("Retrieving all alerts for user '{}'", userId);
         List<UserAlert> userAlerts = prometheusService.getUserAlerts(userId);
         log.info("Retrieved {} alerts for user '{}'", userAlerts.size(), userId);
@@ -56,28 +50,20 @@ public class AlertingService implements AlertingServiceSrv.Iface {
     }
 
     @Override
-    public List<Alert> getSupportedAlerts() {
-        log.info("Retrieving all supported alerts");
-        List<AlertTemplate> metricTemplates =
-                templateService.getAlertTemplates();
-        List<Alert> supportedAlerts =
-                metricTemplates.stream()
-                        .map(alertTemplateAlertConverter::convert)
-                        .sorted(Comparator.comparing(a -> a.getName()))
-                        .collect(Collectors.toList());
-        log.info("Retrieved {} supported alerts", supportedAlerts.size());
-        return supportedAlerts;
-    }
-
-    @Override
-    public AlertConfiguration getAlertConfiguration(String alertTemplateId) {
-        log.info("Retrieving configuration for alert '{}'", alertTemplateId);
-        List<AlertTemplate.AlertConfigurationParameter> metricParams =
-                templateService.getAlertTemplateParams(alertTemplateId);
-        AlertConfiguration alertConfiguration = alertParamsToAlertConfiguration.convert(metricParams);
-        alertConfiguration.setId(alertTemplateId);
-        log.info("Successfully retrieved configuration for alert '{}': {}", alertTemplateId, alertConfiguration);
-        return alertConfiguration;
+    public List<AlertConfiguration> getAlertConfigurationsList() {
+        log.info("Retrieving all alert configurations");
+        List<AlertConfiguration> alertConfigurations = templateService.getAlertTemplates().stream()
+                .sorted(Comparator.comparing(AlertTemplate::getReadableName))
+                .map(alertTemplate -> {
+                    AlertConfiguration alertConfiguration =
+                            alertParamsToAlertConfiguration.convert(alertTemplate.getParameters());
+                    alertConfiguration.setId(alertTemplate.getId());
+                    alertConfiguration.setName(alertTemplate.getReadableName());
+                    return alertConfiguration;
+                })
+                .collect(Collectors.toList());
+        log.info("Retrieved {} alert configurations", alertConfigurations.size());
+        return alertConfigurations;
     }
 
     @Override
