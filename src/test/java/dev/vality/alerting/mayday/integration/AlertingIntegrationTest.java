@@ -72,6 +72,9 @@ public class AlertingIntegrationTest {
         when(dawayDao.getPaymentTerminals()).thenReturn(DawayObjectUtil.getTestTerminals());
         when(dawayDao.getShops()).thenReturn(DawayObjectUtil.getTestShops());
         when(dawayDao.getCurrencies()).thenReturn(DawayObjectUtil.getTestCurrencies());
+        when(dawayDao.getPayoutProviders()).thenReturn(List.of());
+        when(dawayDao.getPayoutTerminals()).thenReturn(List.of());
+        when(dawayDao.getWallets()).thenReturn(List.of());
 
         var createAlertRequest =
                 ThriftObjectUtil.testCreatePaymentConversionAlertRequest(getPaymentConversionAlertConfiguration());
@@ -85,10 +88,13 @@ public class AlertingIntegrationTest {
         verify(alertmanagerClient, times(1))
                 .addRouteIfNotExists(eq(alertmanagerService.getAlertmanagerConfigName()), any());
 
-        verify(dawayDao, times(2)).getPaymentProviders();
-        verify(dawayDao, times(2)).getPaymentTerminals();
-        verify(dawayDao, times(2)).getShops();
-        verify(dawayDao, times(2)).getCurrencies();
+        verify(dawayDao, times(6)).getPaymentProviders();
+        verify(dawayDao, times(6)).getPaymentTerminals();
+        verify(dawayDao, times(6)).getShops();
+        verify(dawayDao, times(6)).getCurrencies();
+        verify(dawayDao, times(4)).getPayoutProviders();
+        verify(dawayDao, times(4)).getPayoutTerminals();
+        verify(dawayDao, times(5)).getWallets();
     }
 
     @Test
