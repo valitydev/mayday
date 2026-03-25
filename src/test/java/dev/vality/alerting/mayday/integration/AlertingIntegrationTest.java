@@ -1,9 +1,6 @@
 package dev.vality.alerting.mayday.integration;
 
-import dev.vality.alerting.mayday.Alert;
-import dev.vality.alerting.mayday.AlertConfiguration;
-import dev.vality.alerting.mayday.AlertingServiceSrv;
-import dev.vality.alerting.mayday.UserAlert;
+import dev.vality.alerting.mayday.*;
 import dev.vality.alerting.mayday.alertmanager.client.k8s.AlertmanagerClient;
 import dev.vality.alerting.mayday.alertmanager.client.k8s.model.AlertmanagerConfig;
 import dev.vality.alerting.mayday.alertmanager.service.AlertmanagerService;
@@ -75,6 +72,9 @@ public class AlertingIntegrationTest {
         when(dawayDao.getPaymentTerminals()).thenReturn(DawayObjectUtil.getTestTerminals());
         when(dawayDao.getShops()).thenReturn(DawayObjectUtil.getTestShops());
         when(dawayDao.getCurrencies()).thenReturn(DawayObjectUtil.getTestCurrencies());
+        when(dawayDao.getPayoutProviders()).thenReturn(List.of());
+        when(dawayDao.getPayoutTerminals()).thenReturn(List.of());
+        when(dawayDao.getWallets()).thenReturn(List.of());
 
         var createAlertRequest =
                 ThriftObjectUtil.testCreatePaymentConversionAlertRequest(getPaymentConversionAlertConfiguration());
@@ -88,10 +88,13 @@ public class AlertingIntegrationTest {
         verify(alertmanagerClient, times(1))
                 .addRouteIfNotExists(eq(alertmanagerService.getAlertmanagerConfigName()), any());
 
-        verify(dawayDao, times(2)).getPaymentProviders();
-        verify(dawayDao, times(2)).getPaymentTerminals();
-        verify(dawayDao, times(2)).getShops();
-        verify(dawayDao, times(2)).getCurrencies();
+        verify(dawayDao, times(6)).getPaymentProviders();
+        verify(dawayDao, times(6)).getPaymentTerminals();
+        verify(dawayDao, times(6)).getShops();
+        verify(dawayDao, times(6)).getCurrencies();
+        verify(dawayDao, times(4)).getPayoutProviders();
+        verify(dawayDao, times(4)).getPayoutTerminals();
+        verify(dawayDao, times(5)).getWallets();
     }
 
     @Test
@@ -101,7 +104,7 @@ public class AlertingIntegrationTest {
                 .thenReturn(Optional.of(new PrometheusRule()));
         when(prometheusClient.getPrometheusRuleGroupAlerts(prometheusService.getPrometheusRuleName(), userName))
                 .thenReturn(Set.of());
-        List<UserAlert> userAlerts = thriftEndpoint.getUserAlerts(userName);
+        List<UserAlert> userAlerts = thriftEndpoint.getUserAlerts(new GetUserAlertsRequest().setUserId(userName));
         assertNotNull(userAlerts);
         assertTrue(userAlerts.isEmpty());
         verify(prometheusClient, times(1))
@@ -118,7 +121,7 @@ public class AlertingIntegrationTest {
                 .thenReturn(Optional.of(new PrometheusRule()));
         when(prometheusClient.getPrometheusRuleGroupAlerts(prometheusService.getPrometheusRuleName(), userName))
                 .thenReturn(Set.of(testRule));
-        List<UserAlert> userAlerts = thriftEndpoint.getUserAlerts(userName);
+        List<UserAlert> userAlerts = thriftEndpoint.getUserAlerts(new GetUserAlertsRequest().setUserId(userName));
         assertNotNull(userAlerts);
         assertEquals(1, userAlerts.size());
 
@@ -132,28 +135,17 @@ public class AlertingIntegrationTest {
     }
 
     AlertConfiguration getPaymentConversionAlertConfiguration() throws TException {
-        List<Alert> alertList = getSupportedAlerts();
-        AlertConfiguration alertConfiguration =
-                thriftEndpoint.getAlertConfiguration(alertList.stream()
-                        .filter(alert -> alert.getId().equals("payment_conversion"))
-                        .findFirst()
-                        .orElseThrow().getId());
-        assertNotNull(alertConfiguration);
+        List<AlertConfiguration> alertConfigurations = thriftEndpoint.getAlertConfigurationsList();
+        assertNotNull(alertConfigurations);
+        assertFalse(alertConfigurations.isEmpty());
+        AlertConfiguration alertConfiguration = alertConfigurations.stream()
+                .filter(alert -> alert.getId().equals("payment_conversion"))
+                .findFirst()
+                .orElseThrow();
         assertNotNull(alertConfiguration.getId());
+        assertNotNull(alertConfiguration.getName());
         assertNotNull(alertConfiguration.getParameters());
         assertFalse(alertConfiguration.getParameters().isEmpty());
         return alertConfiguration;
-    }
-
-    private List<Alert> getSupportedAlerts() throws TException {
-        List<Alert> alertList = thriftEndpoint.getSupportedAlerts();
-        assertNotNull(alertList);
-        assertFalse(alertList.isEmpty());
-
-        for (Alert alert : alertList) {
-            assertNotNull(alert.getId());
-            assertNotNull(alert.getName());
-        }
-        return alertList;
     }
 }
